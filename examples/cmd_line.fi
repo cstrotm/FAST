@@ -1,0 +1,55 @@
+;===========================================================================
+;=		      Command line functions for FAST			   =
+;===========================================================================
+
+;13/10/91	cmd_add (n) = address of command line #n (1..)
+;		cmd_len (n) = length of command line #n (1..)
+;		cmd_nos     = number of command lines.
+;		if zero is returned then an error occurred,
+;		ie: not enough command lines.
+;
+
+var cmdn
+
+function cmd_getn
+    {
+    cmd_m=81h
+    while peekb cmd_m<>13
+	{
+	cmd_c=peekb cmd_m
+	if (cmd_c=' ') or (cmd_c=9) then goto cmd_next_char
+	cmdn--
+	cmd_add_ret=cmd_m
+
+	cmd_loop2:
+	cmd_m++
+	cmd_c=peekb cmd_m
+	if (cmd_c<>' ') and (cmd_c<>9) and (cmd_c<>13) then goto cmd_loop2
+	cmd_len_ret=cmd_m-cmd_add_ret
+	if cmdn=0 then return 1
+
+	cmd_next_char:
+	if cmd_c<>13 then cmd_m++
+	}
+    return 0
+    }
+
+function cmd_add(cmdn)
+    {
+    if cmd_getn then return cmd_add_ret
+    return 0
+    }
+
+function cmd_len(cmdn)
+    {
+    if cmd_getn then return cmd_len_ret
+    return 0
+    }
+
+function cmd_nos
+    {
+    cmdn=256
+    cmd_getn
+    return 256-cmdn
+    }
+

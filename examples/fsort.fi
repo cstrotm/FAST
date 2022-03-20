@@ -1,0 +1,30 @@
+;FAST SORT library.
+#short
+sort_work ? 200
+
+function sort(sstarts,sstarto,slen,srecs)
+    {
+    if slen>200 then return 0
+    if not srecs then return 1
+    sort_size=slen*srecs
+    sort_seg=allocate (1+sort_size+slen)/16+1:if error then return 0
+    splace=0
+
+    for sort_many=0 to srecs-1
+    sorg=sstarto+splace
+    moveb slen from sstarts|sorg to sort_work
+    sort_rec=findbin(sort_work,sort_seg,0,sort_many,slen,slen)
+
+    if not sort_rec then sort_rec=find_bin_put
+
+    sort_find=(sort_rec-1)*slen
+    if splace above sort_find then moveb splace-sort_find from sort_seg|sort_find to sort_seg|sort_find+slen
+    moveb slen from sort_work to sort_seg|sort_find
+    splace+=slen
+    next sort_many
+
+    moveb sort_size from sort_seg|0 to sstarts|sstarto
+    deallocate sort_seg
+    return 1
+    }
+

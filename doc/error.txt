@@ -1,0 +1,255 @@
+! #ENDIF without #IF.
+
+The compiler directive #IF has been used but no #ENDIF has been found before
+the end of the source file - check all #IFs.
+~! Absolute address expected - Eg SEG|OFF or OFF
+
+A command or function expected an address but no such luck - perhaps you
+used a colon (:) instead of the pipe (|) for a segment|offset address?
+~! Bad digit (unrecognisable number).
+
+A wierd character is in the middle of a number (either decimal, hex or
+binary) - check which type of number it is then go from there.
+~! Cannot set CS register directly, use CALL SEGMENT|OFFSET
+
+You tried setting the CS (code segment) register with the REG command
+- to jump to a new address use CALL SEGMENT:OFFSEG or JMP SEGMENT:OFFSEG.
+~! Cannot use reserved word as variable or label.
+
+A command or function name has been used as a user defined symbol
+(variable or label) - check which word it is then rename it.
+~! Code exceeds short jump range.
+
+If the #SHORT option is set then IF THEN ELSE statements must have short
+code between them. To fix this error set the #LONG option before the IF
+and set then #SHORT after it (normally within the squiggly brackets {}).
+
+Example.
+
+#LONG
+IF kk=13 THEN
+    {
+#SHORT                          ;#SHORT is compiled as a comamnd so must put it
+    ;perform tasks here...      ;inside the brackets {}.
+    ...
+    }
+~! Data types mismatch, conflict between two words.
+
+A symbol has been re-defined or used in way which contradicts the first time it
+was used - if a variable then may have been used before it was assigned a
+value, therefore FAST assumes it to be a label. To fix this define the variable
+using the VAR command at the start of the program (or using UNSIGNED if the
+variable is unsigned).
+~! Divide by zero not allowed.
+
+A divide by zero was done while the compiler was optimizing an expression
+- could be a constant=0 (check / constants).
+~! Double definition of word.
+
+A word which is of type const, procedure, function or label cannot be defined
+twice or redefined.
+~! End of file: Unknown Reason, check {}.
+~! End of file: ON GOTO/GOSUB statement(s) not closed.
+
+Has the ON GOTO or ON GOSUB statement got any parameters and are they seperated
+with commas?
+~! End of file: IF-THEN-ELSE statement(s) not closed.
+
+Check most recent IF THEN ELSE combinations, is the word THEN or ELSE missing
+when it should be there?
+~! End of file: REPEAT statement(s) not closed.
+
+Check most recent REPEAT statements, has it been finished?
+~! End of file: PROCEDURE or FUNCTION declaration(s) not finished.
+
+Check most recent changes to PROCEDURE and FUNCTION declarations, may not be
+closed somewhere.
+~! End of file: WHILE statement(s) not closed.
+
+Has the most recent WHILE statement been completed?
+~! End of file: FOREVER statement(s) not closed or ENDFOR mismatch.
+
+The ENDFOR command may not be inside a FOREVER statement or the FOREVER hasn't
+been completed.
+~! End of file: WAIT FOR statement(s) not closed.
+~! Excess characters in line - ignored.
+
+The compiler finished compiling the statement/line but there were more
+characters on the line than expected - check the command being compiled.
+~! Expected a string expression using "string" or 'string'.
+
+The syntax of a command/function requires a string but one was not given.
+~! Expected a valid file indicator - #n, n=1 to 12
+
+A file number was expected preceded with the hash # symbol.
+~! Expected either ON or OFF.
+
+The command expects ON or OFF but that's not what is on the line now is it???
+- Check the command or compiler directive syntax (have you missed it out
+  alltogether).
+- Did you use an equals sign? It's not needed.
+~! FAST code error, optimisation data tables corrupt.
+
+Something is wrong with FAST (or you stuffed your copy) - if this happens
+in the same place more than once then tell me about it.
+~! Incorrect syntax, wrong seperator.
+
+The wrong seperator was used - check command or function syntax, probably used
+WITH or TO/FROM the wrong way.
+~! Internal stack error - recovered ok.
+
+There is a mis-match in the program where braces {}, IF THEN ELSE, FOR-NEXT,
+WHILE, REPEAT or FOREVER statments have been used - they have been used around
+each other in a way which the compiler can't interpret properly - check the
+most recent changes or everything.
+
+- The actual error is probably above where this error occurs.
+~! Invalid #SETDOS format: n.xx
+
+The #SETDOS option must be used strictly as #SETDOS n.xx.
+
+Example...
+
+#SETDOS 3.30    ;Not #SETDOS 3.3
+~! Invalid parameter(s).
+
+Invalid parameters in a procedure, function or in a FAST comamnd/function.
+- Check commas and other seperators.
+~! Limit of 50 nested commands exceeded.
+
+Commands have been nested too deeply (the limit is approximately 50 but
+varies depending on the commands being nested).
+~! Missing comma.
+
+The command or function needs a comma to seperate two parameters but there
+wasn't one - check the syntax of the command or function.
+~! Missing ),] or }
+
+The syntax needs a ), ] or } to know that the command has finished - check
+for opening ([{ where no closing )]} match them.
+~! Missing numeric expression.
+
+The syntax for the command or function expected a numeric expression but
+the compiler found something else or nothing at all.
+~! Missing equals '='.
+
+An equals sign was expected - check the syntax of the command or function.
+~! Missing end of string - " or '
+
+A string was started but the end marker is missing.
+~! No room to include file.
+
+If #INCLUDEs are used within included files then this requires another
+chunk of memory (10k for each level deep) - fix by getting more memory
+(wow! the price) or if applicable don't load the TSR programs before
+compiling (this gives FAST more memory to compile with).
+~! Number out of range.
+
+A numeric value exceeds a limit - check the comamnd and its parameter values.
+~! Out of memory for UNDEFINED data table - increase with /M option.
+
+FAST has definitely filled up the undefined data table - use FAST /M to
+increase this size.
+~! Out of memory, exceeded the 64K limit.
+
+The code + variables + arrays + windows + stack uses more than 64K - fix by
+moving arrays into other segments.
+
+- Have you written more than 6000 lines of code? Try overlays or re-write some
+  code in a more modulised way (normally more compact even if slightly slower).
+- If you have large SPACE comamnds or large variables defined using ? then try
+  using the ALLOCATE command and use another segment as opposed to the code
+  segment, all the code will need modification.
+~! Out of table space - increase with /M option.
+
+An attempt to add a new symbol to the table failed because there was no more
+room in the symbol table.
+~! Severe error in UNDEF TABLE.
+
+FAST has stuffed its own table for undefined information as it compiles
+- try increasing the undef table space (using FAST /M). Tell me if it
+still continues.
+~! Severe error in LABEL TABLE.
+
+Somehow the label/symbol table has become corrupt - retry after increasing
+the label space memory and maximum labels. If still occurs then tell me.
+~! Statement too long, reduce expressions to variables.
+
+When #ERRORS ON, lines with automatic error checking are limited in size.
+To cure the problem change all expressions to variables and assign the
+variables before the command.
+
+Example.
+
+WRITE #2,200 FROM 10+PEEK(table+y*2+5)
+
+This example is not too long!
+But assuming it was, re-write as...
+
+addr=200 FROM 10+PEEK(table+y*2+5)
+WRITE #2,200 FROM addr.
+~! Syntax error.
+
+Unrecognised FAST command/function or really bad syntax (probably just a typing
+error).
+~! Too many ERROR jumps (compiler error)!
+
+This should never happen. If it does tell me about it (something wrong
+with FASTs data tables somewhere somehow).
+~! Too many compiler #IF statments, maximum is 20.
+
+The compiler directive #IF has been nested over the limit of 20 - if this
+seriously limits your program from working then tell me and I will shift
+the limit to about 100 or so (twenty seemed ok at the time - mind you so
+did 32MB to the MSDOS crowd in 1982).
+~! Too many lines compiled, max=10389.
+
+This limit is set by the trace/debug options.
+Solve by combining several statements into one line.
+~! Too many files compiled, max=50
+
+You can't #include more than 50 files - limited by trace/debug options.
+Solve by combining small files into larger ones where appropriate.
+~! Too many labels - increase with /M option.
+
+The number of labels exceeds that which is specified in the FAST maintenance
+- increase with /M option.
+~! Unknown compiler directive.
+
+Simple, you thought the compiler had something it doesn't?
+- Check the compiler directives for correct spellings & available options.
+~! Warning! Undefined label (0 used).
+
+A label hasn't been defined - all occurrences have the value 0.
+
+~! Warning... deallocation of memory failed after include.
+
+At the end of the #INCLUDE when FAST tried to deallocate the space it used
+there was an error - caused by a freak accident (I've never had it, but if it
+happens then re-boot and re-compile just to be safe), as a programmer I had
+to allow for everything.
+~! Word defined in way which contradicts its use.
+
+A word/symbol has been defined and used where it must be a different type
+so firstly check which type it should be and go from there.
+~! Word undefined!.
+
+A symbol (any user defined word of any type) has been used on the line shown
+but not defined anywhere.
+~! Wrong number of parameters for function or procedure.
+
+A procedure or function has been defined but too many parameters were given
+- check the procedure/function declaration.
+~! Wrong type, expected a variable.
+
+Something other than a variable has been used - may also be an undefined
+variable in which case must declare it using the VAR comamnd at the top
+of the file.
+~! Wrong type, expected a label.
+
+A symbol was found but it isn't a label - it should have been.
+~* Invalid error message *
+
+Try and work out what is wrong then tell me about it - I will fix FAST so it
+recognises it in future.
+~

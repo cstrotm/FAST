@@ -1,0 +1,87 @@
+
+var x,y,set_attr
+
+function set_coly
+    {
+    if x=0 then y=(set_attr and 128)/128
+    if x=1 then y=(set_attr and 112)/16
+    if x=2 then y=(set_attr and 8)/8
+    if x=3 then y=set_attr and 7
+    }
+
+proc put_colxy(px)
+    {
+    push x,y
+    x=px
+    set_coly
+    locate 14+y,17+x*12
+    print ">";
+    pop y,x
+    }
+
+function set_colour(set_attr)
+    {
+    old_attr=set_attr
+    scroll 0,2,79,24,0
+    x=3:set_coly
+
+    start_colour:
+    locate 4,0
+    print "Select the colour you want by using the arrow keys, press ENTER or DONE when Ok."
+    locate 6,20
+    print "Press ESCAPE to leave colour unchanged."
+    locate 9,22
+    print "colour = ";set_attr;"  ";
+    locate 9,36
+    colour set_attr:print "--- 'Example Text' ---";
+    colour 7
+
+    locate 12,17
+    print " Flash    Background   Highlight   Foreground";
+    locate 13,17
+    print "컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�";
+    locate 14,17
+    print " Still       Black       Normal      Black   ";:locate 15,17
+    print " Blink       Blue        Intense     Blue    ";:locate 16,17
+    print "             Green                   Green   ";:locate 17,17
+    print "             Cyan                    Cyan    ";:locate 18,17
+    print "             Red                     Red     ";:locate 19,17
+    print "             Magenta                 Magenta ";:locate 20,17
+    print "             Brown                   Brown   ";:locate 21,17
+    print "             White                   White   ";:locate 22,17
+
+    put_colxy(0)
+    put_colxy(1)
+    put_colxy(2)
+    put_colxy(3)
+
+    locate 14+y,17+x*12
+    repeat 9 video[locpos+1]b=112:locpos+=2
+    wait for keypressed
+    repeat 9 locpos-=2:video[locpos+1]b=7
+    print " ";
+    cks=keyscan
+    cs=high cks
+
+    if cs=1 then return old_attr
+    if (cks=20011) or (cs=28) then return set_attr  ;enter or done.
+    if cs=71 then y=0
+    if cs=72 then y--
+    if cs=75 then x--:set_coly
+    if cs=77 then x++:set_coly
+    if cs=79 then y=7
+    if cs=80 then y++
+
+    if x<0 then x=3:set_coly
+    if y<0 then y=7:if (x=0) or (x=2) then y=1
+    if x>3 then x=0:set_coly
+    if y>7 then y=0
+    if (x=0) or (x=2) then if y>1 then y=0
+
+    if x=0 then set_attr=(set_attr and 127)+y*128
+    if x=1 then set_attr=(set_attr and 143)+y*16
+    if x=2 then set_attr=(set_attr and 247)+y*8
+    if x=3 then set_attr=(set_attr and 248)+y
+    goto start_colour
+    }
+

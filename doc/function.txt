@@ -1,0 +1,356 @@
+ FUNCTIONS
+ =========
+
+Functions are used in numeric expressions, they perform some task which returns
+a value.
+
+Notes:      +   represents a function which is considered advanced.
+            $$$ represents a function which is not working yet - work needed.
+~ABS         ABS n
+
+Returns the absolute (positive) value of n.
+
+ABS assumes n is a two's complement number, therefore the 15th bit is the sign
+bit (n is always a word value, ie 16 bits).
+
+Examples.
+
+PRINT ABS 2         ;Prints 2.
+PRINT ABS -2        ;Prints 2.
+PRINT ABS 65534     ;Prints 2.
+~ALLOCATE    ALLOCATE n
+
+Returns the segment for a block of memory n paragraphs long, includes ERROR
+checking.
+
+A paragraph of memory is equal to 16 bytes.
+If there aren't enough paragraphs of memory left then an ERROR 8 occurs (+ the
+BX register will contain the maximum number of paragraphs available).
+
+If the memory has been corrupted (normally by a program going over a segment
+boundary) then ERROR 7 occurs.
+
+A segment of allocated memory can be used to load overlays, create tables,
+store data & anything else, including large arrays.
+
+Example.
+
+file_seg=ALLOCATE 4000  ;#ERRORS ON (assumed, no need for extra error check).
+load "file",file_seg|0
+~CARRY     + CARRY
+
+Returns 1 if the computers carry flag is set else returns 0.
+~CDISK       CDISK
+
+Returns the value of the default disk. 0=A:, 1=B: etc...
+~COMPARE     COMPARE[B] length AT address WITH address
+
+Returns the address of the first mismatch in words/bytes of two addresses, if
+they are both the same then 0 is returned.
+The address returned will be starting from the first address specified.
+
+Note ! If the first address=0 then 0 will be returned if either there is
+       no mismatch of the first words/bytes mismatch.
+
+Example.
+
+diff=COMPARE 2000 FROM video|2 WITH old_video|2
+IF diff THEN update_new_screen  ;If differences found then update screen.
+~CURPOS      CURPOS
+
+Returns the current cursor position as a word value.
+The X (column) value is stored in the low 8 bits and y (row) in the upper 8
+bits, therefore: value=CURPOS ;value=y*256+x.
+~DIGITS      DIGITS n
+
+Returns the number of digits in the printed form of the number n.
+
+Examples.
+
+PRINT DIGITS 1      ;Prints 1
+PRINT DIGITS 295    ;Prints 3
+PRINT DIGITS 40000  ;Prints 5
+~DTA OFFSET  DTA OFFSET
+
+Returns the current disk transfer address offset value.
+This is where FIND FIRST and FIND NEXT commands store information about files.
+~DTA SEGMENT DTA SEGMENT
+
+Returns the current disk transfer address segment value.
+This is where FIND FIRST and FIND NEXT commands store information about files.
+~GETINT    + GETINT b
+
+Returns the segment and offset of the interupt vector b.
+If GETINT is used as a word function then only the offset is returned, to
+find out the segment and offset of an interupt vector then use a 32 bit
+variable.
+
+Note ! b is a hexadecimal number as with all interupt vectors in FAST.
+     ! GETINT can only be used in 32 bit expressions.
+
+Examples.
+
+v32 = GETINT 21     ;v32=segment of vector 21h * 65536 + offset of vector 21h.
+
+int9  = GETINT 9
+int9o = LOW int9    ;int9o=offset for interupt 9.
+int9s = HIGH int9   ;int9s=segment for interupt 9.
+~HANDLE    + HANDLE #n
+
+Returns the file handle number stored in any of the twelve file handles that
+FAST can use.
+
+See the HANDLE command for information on file handles.
+~HIGH        HIGH n
+
+Returns the high part of n.
+If n is a 16 bit value then the high 8 bits are returned as a byte value.
+If n is a 32 bit value then the high 16 bits are returned as a word value.
+
+Example.
+
+PRINT HIGH 16384    ;Prints 64.
+~HIT         HIT x,y,
+~IN        + IN n
+
+Returns byte value from port n.
+This is the same as using the assembler IN function.
+~INPUT       INPUT[H][B]
+
+Waits for input from the keyboard (same as with INPUTS command) then returns
+the value of the input number.
+
+Pressing ESC or entering nothing returns 0.
+~KEY         KEY
+
+Returns the key code of the current key pushed and removes it from the buffer.
+~KEYPRESSED  KEYPRESSED
+
+Returns 0 if no keys are waiting in the key buffer otherwise returns 1.
+The key buffer is not effected.
+~KEYSCAN     KEYSCAN
+
+Returns the key code in the low 8 bits of a 16 bit value, the scan code is in
+the high 8 bits.
+The key is removed from the key buffer.
+
+Example.
+
+ks=KEYSCAN      ;ks=combined KEYSCAN values.
+kk=LOW KEYSCAN  ;kk=the key code.
+ss=HIGH KEYSCAN ;ss=the scan code.
+~LCASE       LCASE b
+
+Returns the lower case value of an ascii character, if b does not represent an
+upper case letter then b is returned unchanged.
+
+Example.
+
+PRINT LCASE 'M'     ;Prints 'm'.
+PRINT LCASE ' '     ;Prints ' '.
+PRINT LCASE 'c'     ;Prints 'c'.
+~LOW         LOW n
+
+Returns the low part of n.
+If n is a 16 bit value then the low 8 bits of n are returned as a byte value.
+If n is a 32 bit value then the low 16 bits of n are returned as a word value.
+~MENU        MENU n,b
+
+Returns the value of the option selected from a menu window, if ESC is pushed
+then 0 is returned, otherwise values start at 0.
+b is the option that the highlight bar starts on.
+
+See the OPEN WINDOW command for a description of how to define a window.
+
+Example.
+
+opt=MENU main_menu,1
+IF opt=0 THEN RETURN
+~NOT         NOT n
+
+Returns 0 if n is true (not 0) and 1 if n is false (0).
+~PAGE        PAGE
+
+Returns the current display page.
+First page = 0.
+
+Note ! If using a graphics mode then 0 is returned.
+~PEEK        PEEK[B] address
+
+Returns the word/byte value which is at the address.
+Word values have the low 8 bits at address and the high 9 bits at address+1,
+this is the standard INTEL memory storage.
+
+Note ! If PEEK is used in a 32 bit expression then a 32 bit value is returned,
+       The low 16 bits are stored at address, the high 16 bits at address+2.
+~POINT       POINT x,y
+
+Returns the colour value of the pixel at coordinate x,y.
+See the PLOT command for setting dots.
+~PRINTM      PRINTM address,b [,0]
+
+Returns the address for the start of the next line after printing the
+characters on the screen stored at address.
+
+This function is ULTRA FAST for printing lines of text or file names etc
+on the screen at the current PRINT (LOCPOS) position using the current colour.
+The colour can be left unchanged on the screen by appending the option ,0 to
+the PRINTM function.
+
+b is the width of the column of text to be printed, PRINTM handles tabs and
+also fills the rest of the line with spaces if necessary.
+The end character is either 0, 13 or 26 (NULL, CR or EOF).
+
+Example to print an entire screen of text.
+
+If a carriage return is encountered and the next character is a line feed then
+it is automatically skipped, returning the offset for the byte after to LF.
+If an end of file marker is found then the offset returned will remain at the
+address of the EOF character, hence it never goes over the edge.
+
+FOR y=0 TO 24
+LOCATE y,0
+mem=PRINTM edit_seg|mem,80
+NEXT y
+~PSP       + PSP
+
+Returns the current PSP (Program Segment Prefix).
+The default PSP for any running FAST program is the same as the code segment.
+
+The PSP command and function should be used within TSR (Terminate and Stay
+Resident programs).
+~READ        READ #n,length TO address
+
+Returns the number of bytes read.
+Reads length number of bytes from the open file n and puts them at the address.
+Includes ERROR checking.
+
+Example.
+
+rn=READ #1,10 TO work_area
+IF ERROR THEN ERROR         ;Not needed if #ERRORS ON.
+IF rn<>10 THEN ERROR 13     ;Invalid data becuase 10 bytes weren't read.
+~REG       + REG register
+
+Returns value of computers register.
+Register can be any of AX BX CX DX DI SI BP SP ES DS CS.
+~RLEFT     + RLEFT[Z] n
+
+Returns the value of n after it has been rotated left.
+Rotates the expression n left, all 16 bits.
+The optional Z means zero fill the right bit.
+
+Eg: RLEFTZ  ÄÄÄÄ 0000000100010111b ÄÄÄÄ 0
+~RND         RND
+
+Returns a random number. The sequences starting point is set by the RANDOMIZE
+command.
+~RRIGHT    + RRIGHT[Z] n
+
+Returns the value of n after it has been rotated right.
+Rotates the expression n right, all 16 bits.
+The optional Z means zero fill the left bit.
+
+Eg: RRIGHT  ÚÄ 0000000100010111b Ä¿
+            ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+~SCAN        SCAN
+
+Returns the scan code of the current key pushed and removes it from the buffer.
+~SCRCHR      SCRCHR y,x
+
+Returns the character which is on the screen at row y, column x.
+~SCREEN      SCREEN
+
+Returns the current screen mode, see the SCREEN command for the values which
+represent each different video mode.
+~SEARCH      SEARCH[B] length FROM address FOR n
+
+Returns the address of the first word/byte which equals n, if n is not found
+then 0 is returned.
+
+Note ! If the first address=0 then 0 will be returned if either the first
+       word matches or if n is not found.
+
+Example.
+
+fnd=SEARCHB table_len FROM table FOR key
+IF fnd THEN process_tab(fnd)  ;If found then process.
+~SELECT      SELECT n,b
+
+Returns the line from the menu selected (0=escape).
+Puts the highlight bar on the menu (WINDOW details at address n).
+The window must already be open, using either MENU or OPEN.
+The window is not closed after select.
+b is the line (from 1) where the highlight bar starts.
+~SERIAL      SERIAL_STATUS
+
+Serial communications.
+Returns the status of the serial port (1) for the line and modem.
+
+line_status  = high serial_status
+modem_status = low  serial_status
+
+ AH (Line status)
+ ----------------
+        7 6 5 4 3 2 1 0
+        1 . . . . . . .       Time-out error
+        . 1 . . . . . .       Transfer shift register empty
+        . . 1 . . . . .       Transfer holding register empty
+        . . . 1 . . . .       Break-detect error
+        . . . . 1 . . .       Framing error
+        . . . . . 1 . .       Parity error
+        . . . . . . 1 .       Overrun error
+        . . . . . . . 1       Data ready
+
+ AL (Modem status)
+ -----------------
+        7 6 5 4 3 2 1 0
+        1 . . . . . . .       Received line signal detect
+        . 1 . . . . . .       Ring indicator
+        . . 1 . . . . .       Data set ready
+        . . . 1 . . . .       Clear to send
+        . . . . 1 . . .       Change in receive line signal detected
+        . . . . . 1 . .       Trailing edge ring detector
+        . . . . . . 1 .       Change in data set ready
+        . . . . . . . 1       Change in clear to send
+~SERIAL_SEND SERIAL_SEND n
+
+Serial Communications.
+Sends a byte to the serial port, COM1. SERIAL_SEND uses the BIOS int 14h
+services to send characters.
+
+To receive characters, use ENABLE SERIAL.
+
+Example: See ENABLE SERIAL for a excerpt coms program using FAST.
+         The PHONE.F program is a complete terminal emulator with file
+         transfers. Only available to registered users.
+~STACK     + STACK
+
+Returns the current value of the stack pointer, the SP register.
+~TIMER       TIMER
+
+Returns the value of the current time, in 18.2 second units.
+
+The TIMER value can range from 0 to 86399 so the timer function should be used
+with a 32 bit variable.
+
+Example.
+
+PRINT TIMER     ;If TIMER was 80000 then would print 14464 (low 16 bits).
+V32=TIMER       ;V32 (assumed a 32 bit variable) would equal 80000.
+~UCASE       UCASE b
+
+Returns the upper case value of an ascii character, if b does not represent a
+lower case letter then b is returned unchanged.
+
+Example.
+
+PRINT UCASE 'M'     ;Prints 'M'.
+PRINT UCASE ' '     ;Prints ' '.
+PRINT UCASE 'c'     ;Prints 'C'.
+~USR       + USR address
+
+Returns the value returned by a subroutine in the AX register.
+
+Note ! USR is the same as the CALL command but it returns a value.
+~

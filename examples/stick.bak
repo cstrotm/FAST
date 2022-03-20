@@ -1,0 +1,436 @@
+
+;included from stickr.f or stick.f
+
+;Our Computer
+;------------
+;Initialise the modem and send/receive interupts
+;Dial the requested user: Connect?
+;  - receive screen lines from host
+;  - enter keys, send to host
+;Terminate? hang-up
+
+;Their Computer
+;--------------
+;Initialise the modem and send/receive interupts
+;Wait for connection (on-hook) while doing other stuff
+;  - send compressed screen lines
+;  - receive keys
+
+;25/11/94 - if "modem.cfg" exists then use it for initialisation.
+;	    ascii file with modem init strings
+;
+
+;== contstants ================================================================
+
+buffer ? 80*4+1
+
+const init_size=500
+init_modem ? init_size
+
+var serial_tail
+var output_size,output_tail,output_head,output_seg
+var screen_seg
+var32 wait1,wait2
+
+#errors off
+
+;==============================================================================
+
+function wait_ticks(time)
+    {
+    wait1=timer
+
+    forever
+	{
+	if32 (timer-wait1)>=time then return
+	}
+    }
+
+function wait_seconds(time)
+    {
+    wait_ticks(time*18)
+    }
+
+;==============================================================================
+
+function read_character
+    {
+    c=0:got=0
+    if serial_tail<>serial_head then
+	{
+	c=serial_seg[serial_tail]b:got=1
+	serial_tail++:if serial_tail>=serial_size then serial_tail=0
+	}
+    return c
+    }
+
+;==============================================================================
+
+function send_character(sc)
+    {
+    send_sc=serial_send sc
+    return send_sc
+    }
+
+;==============================================================================
+
+function send_string(sm)    ;add cr/lf
+    {
+    while peekb sm
+	{
+	send_character(peekb sm)
+	sm++
+	}
+    send_character(13)
+    }
+
+;==============================================================================
+
+proc display_character(c)
+    {
+    if c=13 then print bios
+    else if c<>10 then print bios chr c;
+    }
+
+;==============================================================================
+
+function hang_up
+    {
+    wait_seconds(1)
+    repeat 3 send_character('+')
+    wait_seconds(2)
+    send_string("ATH")
+    wait_seconds(1)
+    }
+
+;==============================================================================
+
+proc abort_error(m)
+    {
+    print bios
+    print bios "ERROR ";chr 34;
+    while peekb m print bios chr peekb m;:m++
+    print bios chr 34;
+    beep
+
+    ;if connected then hang-up
+    if serial_status and 128 then   ;connected?
+	{
+	print bios ", unsticking ... ";
+	hang_up
+	print bios "unstuck."
+	}
+
+    print bios
+    disable serial
+    stop
+    }
+
+;==============================================================================
+
+function wait_for_data(wait_time,wait_msg)	;"OK" or 0/NULL
+    {
+    wait_time*=18
+    wait1=timer
+    waitm=buffer:len=0
+    wait_msgp=wait_msg
+
+    forever
+	{
+	if serial_tail<>serial_head then
+	    {
+	    c=read_character
+	    if len<256 then
+		{
+		pokeb waitm,c
+		waitm++:len++
+		}
+	    if wait_msg then
+		{
+		display_character(c)
+		if (lcase c)=(lcase peekb wait_msgp) then
+		    {
+		    wait_msgp++
+		    if peekb wait_msgp=0 then return 1
+		    }
+		else
+		    {
+		    wait_msgp=wait_msg
+		    }
+		}
+	    }
+	else
+	    {
+	    wait2=timer-wait1
+	    if (low wait2)>=wait_time then return 0
+
+	    if key=27 then abort_error("User Aborted")
+	    }
+	}
+
+    ok_msg: datab 'OK',13,10,0
+    }
+
+;==============================================================================
+
+;read_command ("word", type, decimal, default value, minimum, maximum)
+;type: 1=decimal, 2=hex
+
+function read_command(rc_word,rc_type,rc_def,rc_min,rc_max)
+    {
+    rc_value=rc_def
+
+    rc_len=0:m=rc_word		    ;determine length of word
+    while peekb m rc_len++:m++
+
+    ;search command line for details
+    m=81h
+    while peekb m<>13
+	{
+	if peekb m=peekb rc_word then
+	    {
+	    if not compareb rc_len at m with rc_word then
+		{
+		m+=rc_len
+		if peekb m='=' then m++:goto read_value
+		}
+	    }
+	m++
+	}
+    return rc_value
+
+    read_value:
+
+    rc_value=0
+    while (peekb m>='0') and (peekb m<='f')
+	{
+	c=(ucase peekb m)-'0'
+	if c>9 then c-=7	;get value (0-15)
+	m++
+
+	if rc_type=2
+	then rc_value=rc_value*16+c
+	else rc_value=rc_value*10+c
+	}
+
+    ;check limits
+    if rc_value<rc_min then rc_value=rc_min
+    if rc_value>rc_max then rc_value=rc_max
+    return rc_value
+    }
+
+;==============================================================================
+
+function initialise_modem
+    {
+    print bios
+    print bios "ÉÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ»"
+    print bios "º                                                                            º"
+    print bios "º      ÚÄÄÄÄÄÄÄÄÄÄ¿                                        ÚÄÄÄÄÄÄÄÄÄÄ¿      º"
+    print bios "º      ³          ³              ";chr 34;" S T I C K ";chr 34;"             ³          ³      º"
+    print bios "º      ³  þStick  ³                                        ³  þStick  ³      º"
+    print bios "º      ³          ³          pc-pc communications          ³          ³      º"
+    print bios "º      ÀÄÄÄÂÄÄÂÄÄÄÙ                                        ÀÄÄÄÂÄÄÂÄÄÄÙ      º"
+    print bios "º    ÉÍÍÍÍÍÏÍÍÏÍÍÍÍÍ»                                    ÉÍÍÍÍÍÏÍÍÏÍÍÍÍÍ»    º"
+    print bios "º    º PC       ÄÄÄ º                                    º PC       ÄÄÄ º    º"
+    print bios "º    ÈÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼                                    ÈÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼    º"
+    print bios "º                                                                            º"
+    print bios "º                                                                            º"
+    print bios "ÈÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼"
+    print bios "ÖÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ·"
+    print bios "º                         (c) Peter Campbell Software                        º"
+    print bios "ÓÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ½"
+    print bios
+    print bios
+
+    ;command line interface
+    com_port=read_command("p",1,0,1,4)          ;com port (1-4) 0=undefined
+    com_base=read_command("base",2,0,0,8192)    ;base i/o address
+    com_irq=read_command("irq",1,0,2,15)        ;interupt request number
+    com_enable=read_command("enable",2,0,0,255) ;interupt enable flag
+    baud=read_command("speed",1,9600,2400,9600) ;baud speed; currently upto 9600
+
+    command_override=com_port	    ;set to "1" if port specified
+
+    #if resident_tsr
+    #else
+    phone_number=0	;"phone_number" dialling (stick only)
+    m=81h
+    while peekb m=' ' m++
+    if (peekb m>='0') and (peekb m<='9') then phone_number=1
+    if not phone_number then
+	{
+	print bios "You must enter the phone number to dial, eg: STICK 1,043850619"
+	abort_error("Wrong Syntax")
+	}
+    #endif
+
+    if com_port then com_port--:goto found_port_ok
+
+    print bios "Auto Detecting COM PORT"
+    com_port=0
+
+    while com_port<=3
+	{
+	reg dx=com_port,ax=00a3h
+	int 14h 		    ;attemp to initialise port
+	ss=reg ax
+	print bios "  COM";com_port+1;" status=";
+	printh bios ss;"  ";
+	if ss and 16 then print bios "MODEM ON":goto found_port_ok
+	print bios "MODEM ERROR"
+	com_port++
+	}
+
+    print bios "Cannot detect COM port, press 1-4? ";
+    beep
+    wait for keypressed
+    k=key
+    if (k>='1') and (k<='4') then com_port=k-'1'
+    else abort_error("Cannot detect COM Port")
+
+    found_port_ok:
+
+    databits=8
+    stops=0	    ;whoops 21-11-96
+    parity=0	    ;none, odd=8, even=24
+
+    n=databits-5
+    if stops then n+=4
+    n+=parity
+
+    if baud=2400 then n+=5*32
+    else n+=7*32
+
+    if com_base=0 then
+	{
+	if com_port=0 then com_base=03f8h
+	if com_port=1 then com_base=02f8h
+	if com_port=2 then com_base=03e8h
+	if com_port=3 then com_base=02e8h
+	}
+
+    if com_irq=0 then
+	{
+	if com_port=0 then com_irq=12
+	if com_port=1 then com_irq=11
+	if com_port=2 then com_irq=12
+	if com_port=3 then com_irq=11
+	}
+
+    if com_enable=0 then
+	{
+	if com_port=0 then com_enable=0efh
+	if com_port=1 then com_enable=0f7h
+	if com_port=2 then com_enable=0efh
+	if com_port=3 then com_enable=0f7h
+	}
+
+    print bios "COM";com_port+1;
+    printh bios "  BASE=";com_base;
+    print bios " IRQ=";com_irq;
+    printh bios " ENABLE=";com_enable
+    print bios
+
+    serial_size=1024
+    serial_head=0
+    serial_tail=0
+
+    output_size=1024
+    output_head=0
+    output_tail=0
+
+    serial_seg=allocate serial_size/16	    ;input
+;   output_seg=allocate output_size/16
+
+    enable_number=n
+    enable serial,n	;coms port 1/2?
+
+    ;test if ok?
+
+    ;skip modem test, may not be reliable - may abort when doesn't need to!
+    if command_override then goto skip_modem_test
+
+    if (serial_status and 16+32)=0 then abort_error("Modem is not switched on!")
+
+    while (serial_status and 16)=0
+	{
+	if key=27 then abort_error("Aborted")
+	print bios "Waiting for Modem OK"
+	wait_for_data(2,0)
+	}
+
+    skip_modem_test:
+
+    ;send intialisation strings
+    print bios "Initialising Modem ... ";
+
+    fillb init_size from init_modem with 1ah
+    load "modem.cfg",init_modem,init_size
+
+    if error then
+	{
+	send_string("at&G2"):wait_for_data(2,ok_msg)
+	send_string("at&D1"):wait_for_data(2,ok_msg)
+	send_string("at&C2"):wait_for_data(2,ok_msg)
+	send_string("atB13"):wait_for_data(2,ok_msg)
+	send_string("atL1"):wait_for_data(2,ok_msg)
+	send_string("atv1"):wait_for_data(2,ok_msg)
+	}
+    else
+	{
+	m=init_modem
+	while peekb m<>1ah
+	    {
+	    c=peekb m:m++
+	    if c<>10 then send_character(c)
+	    if c=13 then
+		{
+		wait_for_data(2,ok_msg)
+		}
+	    }
+	}
+    print bios "done."
+
+    skip_init:
+    ;nothing left to do?
+    }
+
+;==============================================================================
+
+proc execute_shell(esm)
+    {
+    colour 7
+    scroll 0,0,79,24,0
+    locate 0,0
+    print "File Transfer"
+    print "============="
+    print
+    loctocur
+
+    poke exe_com+4,reg cs
+    poke exe_com+8,reg cs
+    poke exe_com+12,reg cs
+
+    poke exe_com+2,esm
+
+    execute dsz_program,exe_com
+
+    if error then beep
+    return
+
+    dsz_filename: string 40
+
+    dsz_program: fname 'dsz.com'
+
+    dsz_receive: datab 12,'port # rz -y',13
+    dsz_send:	 datab 0,'port # sz '
+		 space 50
+
+    exe_com:
+    data 0
+    data 0,0
+    data 5ch,0
+    data 6ch,0
+    }
+

@@ -1,0 +1,41 @@
+;== Find string using binary sorting =======================================
+
+;FINDBIN ( string, segment, address, records, length, compare_length )
+;0 = not found, else element (1-records).
+
+#short
+var find_bin_put
+
+function find_bin(bin_str,bin_seg,bin_adr,bin_rec,bin_len,bin_cmp)
+    {
+    find_bin_put=1
+    bin_low=0:bin_high=bin_rec
+    if bin_rec=0 then return 0
+
+    while bin_low<=bin_high
+	{
+	bin_mid=(bin_high-bin_low)/2+bin_low
+	if bin_mid>=bin_rec then find_bin_put=bin_rec+1:return 0
+	;Compare string at BIN_STR and BIN_SEG|BIN_ADR+BIN_MID*BIN_LEN.
+	bin_m=bin_adr+bin_mid*bin_len
+
+;	m=bin_str:repeat bin_cmp print chr peek m;:m++
+;	print " ??? ";
+;	m=bin_m:repeat bin_cmp print chr bin_seg[m];:m++
+;	print
+
+	bin_q=compareb bin_cmp at bin_str with bin_seg|bin_m
+	if bin_q then
+	    {
+	    bin_c=bin_seg[bin_m+bin_q-bin_str]b
+	    if peekb bin_q>bin_c
+		then bin_low=bin_mid+1
+		else bin_high=bin_mid-1
+	    }
+	else return bin_mid+1
+	}
+    if bin_low>bin_rec then find_bin_put=bin_low-1
+	else find_bin_put=bin_low+1
+    return 0
+    }
+

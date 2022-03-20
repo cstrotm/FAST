@@ -1,0 +1,59 @@
+;KEYS
+#short
+const key_port=60h
+key_table ? 128
+
+proc set_keys
+    {
+    fill 64 from key_table with 0
+    dos 35(9)
+    poke i9ks,reg es:poke i9ko,reg bx
+    reg dx=newkeys:dos 25(9)
+    }
+
+proc reset_keys
+    {
+    reg dx=peek i9ko,ds=peek i9ks:dos 25(9)
+    reg ds=reg cs
+    }
+
+proc i9_dont_do_this
+    {
+    newkeys:
+    pushall
+    reg ds=reg cs
+
+    kscan=in key_port
+    i9ad=key_table+(kscan and 127)
+    if kscan and 128 then
+	{
+	if peekb i9ad=1 then pokeb i9ad,255 else pokeb i9ad,0
+	}
+    else
+	{
+	if (peekb i9ad=0) or (peekb i9ad=255) then pokeb i9ad,1
+	}
+
+    popall
+    inline 0eah
+    i9ko:
+    data 0
+    i9ks:
+    data 0
+    }
+
+function key_press(ksp)
+    {
+    i9k=key
+    ka=key_table+ksp
+    if peekb ka=1 then
+	{
+	if key_repeat<>1 then pokeb ka,key_repeat
+	return 1 ;First time read.
+	}
+   ;if peekb ka=255 then pokeb ka,0:return 1 ;First time read, but now depressed.
+    if peekb ka=2 then pokeb ka,key_repeat:return 1 ;2nd+ time read.
+    if peekb ka<100 then pokeb ka,peekb ka-1 ;Decrement count.
+    return 0
+    }
+

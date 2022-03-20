@@ -1,0 +1,338 @@
+
+;==============================================================================
+; Quick Sorter in Fast. (c) Peter Campbell Software 1994
+;==============================================================================
+
+#short
+
+var32 e132,e232,nelem32
+var32 start_time,end_time
+
+var qwidth
+var32 exchanges,n32,approx_exchanges
+
+buffer1 ? 256
+buffer2 ? 256
+
+#if use_assembly
+#else
+unsigned pivotp,nelem,leftp,rightp,retval
+var32 pivot32,left32,right32,pivotend32,pivottemp32,lefttemp32,lnum32
+#endif
+
+;==============================================================================
+
+function exchange(e1,e2)
+    {
+    #if use_assembly
+    e132=peek qs_left*qwidth
+    e232=peek qs_right*qwidth
+    #else
+    e132=peek e1*qwidth
+    e232=peek e2*qwidth
+    #endif
+
+    fread(.e132,qwidth,buffer1)
+    fread(.e232,qwidth,buffer2)
+
+    #if 0
+    print bios "exchange ";
+    b1=buffer1
+    repeat qwidth print bios chr peekb b1;:b1++
+    printh bios "    with ";
+    b1=buffer2
+    repeat qwidth print bios chr peekb b1;:b1++
+    #endif
+
+    fwrite(.e232,qwidth,buffer1)    ;order this way - less caching?
+    fwrite(.e132,qwidth,buffer2)
+
+    exchanges++
+
+    if (low exchanges) and 31 then return
+
+    curtoloc
+    n32=exchanges*100
+    n32/=approx_exchanges
+    n=low n32
+    print " ";chr peekb (circle+((low exchanges/32) and 3));" approx ";n;"%";
+    return
+
+    circle: datab '|/-\'
+    }
+
+;==============================================================================
+
+function fcompare(e1,e2)	;return -1,0,+1
+    {
+    #if use_assembly
+    e132=peek qs_left*qwidth
+    e232=peek qs_right*qwidth
+    #else
+    e132=peek e1*qwidth
+    e232=peek e2*qwidth
+    #endif
+
+    fread(.e132,qwidth,buffer1)
+    fread(.e232,qwidth,buffer2)
+
+    #if 0
+    print bios "compare ";
+    b1=buffer1
+    repeat qwidth print bios chr peekb b1;:b1++
+    print bios "   with ";
+    b1=buffer2
+    repeat qwidth print bios chr peekb b1;:b1++
+    #endif
+
+    b1=buffer1
+    b2=buffer2
+
+    repeat qwidth
+	{
+	if peekb b1>peekb b2 then return 1
+	if peekb b1<peekb b2 then return -1
+	b1++:b2++
+	}
+
+    return 0
+    }
+
+;==============================================================================
+
+#if use_assembly
+
+;use quick_sort command within fastlib.asm (library)
+
+#else	;======================================================================
+
+function qsorthelp(pivotp,nelem)
+    {
+    pivot32=peek pivotp
+    nelem32=peek nelem
+
+;   printh bios "qh(";high pivot32;low pivot32;",";high nelem32;low nelem32;")"
+
+    tailrecursion:
+;   if key=27 then abort("tailrecursion")
+
+    if32 nelem32<=2 then
+	{
+	if32 nelem32=2 then
+	    {
+	    right32=pivot32+1
+	    if fcompare(.pivot32,.right32)=1 then exchange(.pivot32,.right32)
+	    }
+	return
+	}
+
+    right32=(nelem32+pivot32)-1
+    left32=(nelem32/2)+pivot32
+
+    ;sort the pivot, left and right elements for median of 3
+
+    if fcompare(.left32,.right32)=1 then exchange(.left32,.right32)
+    if fcompare(.left32,.pivot32)=1 then exchange(.left32,.pivot32)
+    else if fcompare(.pivot32,.right32)=1 then exchange(.pivot32,.right32)
+
+    if32 nelem32=3 then
+	{
+	exchange(.pivot32,.left32)
+	return
+	}
+
+    ;classic Hoare algorithm
+
+    left32=pivot32+1
+    pivotend32=left32
+
+    do_while:
+
+    while1:
+;   if key=27 then abort("while1")
+    retval=fcompare(.left32,.pivot32)
+    if retval<>1 then	    ;<=0
+	{
+	if retval=0 then
+	    {
+	    exchange(.left32,.pivotend32)
+	    pivotend32++
+	    }
+
+	if32 left32<right32 then left32++
+	else goto qbreak
+
+	goto while1
+	}
+
+    while2:
+    if32 left32<right32 then
+	{
+;	if key=27 then abort("while2")
+	retval=fcompare(.pivot32,.right32)
+	if retval=-1 then
+	    {
+	    right32--
+	    }
+	else
+	    {
+	    exchange(.left32,.right32)
+	    if retval then	;<>0
+		{
+		left32++
+		right32--
+		}
+	    goto while_break
+	    }
+	goto while2
+	}
+
+    while_break:
+;   if key=27 then abort("do while")
+    if32 left32<right32 then goto do_while
+
+    qbreak:
+
+    if fcompare(.left32,.pivot32)<>1 then left32++	;<=0
+
+    lefttemp32=left32-1
+    pivottemp32=pivot32
+
+    while3:
+    if32 (pivottemp32<pivotend32) and (lefttemp32>=pivotend32) then
+	{
+;	if key=27 then abort("while exchange")
+	exchange(.pivottemp32,.lefttemp32)
+	pivottemp32++
+	lefttemp32--
+	goto while3
+	}
+
+    lnum32=left32-pivotend32
+    nelem32+=pivot32-left32
+
+    ;sort smaller partition first to reduce stack usage
+
+    if32 nelem32<lnum32 then
+	{
+	push low pivot32,high pivot32
+	push low left32,high left32
+	push low right32,high right32
+	push low pivotend32,high pivotend32
+	push low lnum32,high lnum32
+
+	qsorthelp(.left32,.nelem32)
+
+	pop a,b:lnum32=a*65536+b
+	pop a,b:pivotend32=a*65536+b
+	pop a,b:right32=a*65536+b
+	pop a,b:left32=a*65536+b
+	pop a,b:pivot32=a*65536+b
+
+	nelem32=lnum32
+	}
+    else
+	{
+	push low nelem32,high nelem32
+	push low left32,high left32
+	push low right32,high right32
+	push low pivotend32,high pivotend32
+	push low lnum32,high lnum32
+
+	qsorthelp(.pivot32,.lnum32)
+
+	pop a,b:lnum32=a*65536+b
+	pop a,b:pivotend32=a*65536+b
+	pop a,b:right32=a*65536+b
+	pop a,b:left32=a*65536+b
+	pop a,b:nelem32=a*65536+b
+
+	pivot32=left32
+	}
+
+    goto tailrecursion
+    }
+
+#endif
+
+;==============================================================================
+
+function qsort(nelem,qwidth)	    ;elements,width
+    {
+    nelem32=peek nelem
+
+    exchanges=0
+    efactor=1
+
+    n32=10
+    logn:
+    if32 nelem32>n32 then
+	{
+	efactor++
+	n32*=10
+	goto logn
+	}
+    approx_exchanges=nelem32*efactor
+
+    #if use_assembly
+    quick_sort nelem32,.fcompare,.exchange
+    #else
+    pivot32=0
+    qsorthelp(.pivot32,.nelem32)
+    #endif
+
+    print bios "completed with ";
+    n32=exchanges
+    print32(0)
+    print bios " exchanges."
+    }
+
+;==============================================================================
+
+function open_file(fp)
+    {
+    print bios
+    print bios "Opening File ";chr 34;
+    m=fp
+    while peekb m print bios chr peekb m;:m++
+    print bios chr 34
+
+    open #10,fp
+
+    seek #10,eof:rax=reg ax:rdx=reg dx
+    file_size=(rdx*65536)+rax
+    nelem32=file_size/qwidth
+
+    print bios "Sort array [1 .. ";
+    n32=nelem32
+    print32(0)
+    print bios "] size=";qwidth
+    }
+
+;==============================================================================
+
+function sort_file
+    {
+    print bios
+    print bios "Sorting ... "
+    start_time=timer
+    qsort(.nelem32,qwidth)
+    end_time=timer
+    n32=end_time-start_time
+    printh bios "Sort took ";high n32;low n32;" (hex) / 18.2 seconds."
+    }
+
+;==============================================================================
+
+function close_file
+    {
+    print bios
+    print bios "Closing file ... "
+    if cache_type then
+	{
+	flush_cache
+	}
+    close #10
+    if cache_type=2 then xms_deallocate
+    }
+

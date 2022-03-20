@@ -1,0 +1,323 @@
+
+;==============================================================================
+;==	      DISK CACHING  (c) Peter Campbell Software 1990-1994	     ==
+;==============================================================================
+
+var32 dd32,ci32,ca32,co32
+var32 file_size,fa32,cache_addr
+
+var trf_seg,transfer_seg
+
+const diskc_block=2		    ;number of K per index block
+const diskc_parag=64*diskc_block    ;number of paragraphs per index block
+const diskc_size=1024*diskc_block   ;number of bytes per index block
+const diskc_mask=diskc_size-1	    ;and to get offset
+
+var cache_table,cache_stat,caches
+var cache_seg,cache_type
+
+var cache_xms_table,cache_xms_stat,caches_xms
+var cache_xms_seg
+
+#short
+
+proc read_disk		;dd32, cache_addr
+    {
+    seek #10,dd32
+    r=read #10,diskc_size to transfer_seg|0
+    if cache_type=2 then xms_put(diskc_size,transfer_seg,0,.cache_addr)
+    }
+
+proc write_disk 	;co32, cache_addr
+    {
+    seek #10,co32
+    if cache_type=2 then xms_get(diskc_size,transfer_seg,0,.cache_addr)
+
+    write #10,diskc_size from transfer_seg|0
+    }
+
+;===========================================================================
+
+proc get_cache_xms_stat
+    {
+    ci32=dd32/diskc_size
+    co32=ci32/caches_xms
+    co32=co32*caches_xms	    ;(address/diskc_size) mod caches
+    co32=ci32-co32		    ;
+    ce=low co32 		    ;ce   =  cache entry
+
+    cs=cache_xms_table[cache_xms_stat+ce]b  ;cs   =  status
+
+    co32=peek cache_xms_table|(ce*4)	;cc32 =  old address
+
+    cache_addr=ce*diskc_size	    ;xms offset
+
+    if cs=0 then flag=1
+    else if32 co32<>dd32 then flag=1 else flag=0
+
+    if flag then	;cache entry changed?
+	{
+	if cs=2 then write_disk 	;#co32
+	read_disk
+	cache_xms_table[cache_xms_stat+ce]b=1	;cache status = "read"
+	cache_xms_table[ce*4]=low dd32	    ;update cache address
+	cache_xms_table[ce*4+2]=high dd32
+	}
+    else r=diskc_size
+    }
+
+;==============================================================================
+
+proc read_xms		;dd32, trf_seg
+    {
+    if cache_type=2 then
+	{
+	get_cache_xms_stat
+	xms_get(diskc_size,trf_seg,0,.cache_addr)
+	}
+    else
+	{
+	transfer_seg=trf_seg
+	read_disk
+	}
+    }
+
+proc write_xms		;co32, trf_seg
+    {
+    if cache_type=2 then
+	{
+	push low dd32,high dd32
+	dd32=co32
+	get_cache_xms_stat
+	pop a,b:dd32=a*65536+b
+
+	xms_put(diskc_size,trf_seg,0,.cache_addr)
+	cache_xms_table[cache_xms_stat+ce]b=2	;write
+	}
+    else
+	{
+	transfer_seg=trf_seg
+	write_disk
+	}
+    }
+
+;===========================================================================
+
+proc get_cache_stat
+    {
+    ci32=dd32/diskc_size
+    co32=ci32/caches
+    co32=co32*caches		    ;(address/diskc_size) mod caches
+    co32=ci32-co32		    ;
+    ce=low co32 		    ;ce   =  cache entry
+
+    cs=cache_table[cache_stat+ce]b  ;cs   =  status
+
+    co32=peek cache_table|(ce*4)    ;cc32 =  old address
+
+    trf_seg=cache_seg+ce*diskc_parag	;seg = segment for entry
+
+    if cs=0 then flag=1
+    else if32 co32<>dd32 then flag=1 else flag=0
+
+    if flag then	;cache entry changed?
+	{
+	push ce
+	if cs=2 then write_xms		;#co32
+	read_xms
+	pop ce
+	cache_table[cache_stat+ce]b=1	;cache status = "read"
+	cache_table[ce*4]=low dd32	;update cache address
+	cache_table[ce*4+2]=high dd32
+	}
+    else r=diskc_size
+    }
+
+;===========================================================================
+
+proc read_cache(rc1,rc2,rcl)	;dd32
+    {
+    get_cache_stat
+    moveb rcl from trf_seg|rc1 to rc2
+    }
+
+;===========================================================================
+
+proc write_cache(wc1,wc2,wcl)	;dd32
+    {
+    get_cache_stat
+    moveb wcl from wc2 to trf_seg|wc1
+    cache_table[cache_stat+ce]b=2
+    }
+
+;===========================================================================
+
+proc reset_cache
+    {
+    fillb caches*5 from cache_table|0 with 0	;status: 0=empty 1=read 2=write
+    if cache_type=2 then fillb caches_xms*5 from cache_xms_table|0 with 0
+    }
+
+;==============================================================================
+
+proc init_cache
+    {
+    cache_type=0	    ;no XMS cache
+
+    transfer_seg=allocate diskc_parag
+
+    ;check conventional RAM first
+    #errors off
+    x=allocate 64000
+    #errors on
+
+    caches=reg bx/64	    ;conventional memory
+    if caches<16 then error 8
+    caches-=2		    ;enough memory for cache_seg table
+
+    if xms_init then
+	{
+	largest=xms_query
+	xms_allocate(largest)
+	if largest>=32 then		    ;ignore if less than 32K
+	    {
+	    ;there's a problem with a cache table because it is only 64K
+	    ;it cannot handle a cache larger than 26,214 KB
+	    ;bytes 65535 / 5 * 2K = 26214		(08-09-97)
+	    if largest>26200 then largest=26200
+
+	    caches_xms=largest
+	    cache_type=2		    ;XMS cache
+
+	    xms_table=caches_xms/400+2
+	    if caches<=xms_table then error 8
+
+	    caches-=xms_table
+	    }
+	}
+    else cache_type=1
+
+    cache_seg=allocate caches*64
+
+    caches/=diskc_block
+    cache_table=allocate (caches*5)/16+1
+    cache_stat=caches*4
+
+    print bios "Disk Cache : ";caches*diskc_block;"K conventional"
+
+    #long
+    if cache_type=2 then
+	{
+	#short
+	caches_xms/=diskc_block
+	cache_xms_table=allocate (caches_xms*5)/16+1
+	cache_xms_stat=caches_xms*4
+
+	print bios "Disk Cache : ";caches_xms*diskc_block;"K XMS"
+	}
+
+    reset_cache
+    }
+
+;===========================================================================
+
+proc flush_cache
+    {
+    ce=0
+    while ce<caches
+	{
+	if cache_table[cache_stat+ce]b=2 then
+	    {
+	    co32=peek cache_table|(ce*4)
+	    trf_seg=cache_seg+ce*diskc_parag
+	    push ce
+	    write_xms
+	    pop ce
+	    cache_table[cache_stat+ce]b=1  ;reset to read only.
+	    }
+	ce++
+	}
+
+    #long
+    if cache_type=2 then
+	{
+	#short
+	ce=0
+	while ce<caches_xms
+	    {
+	    if cache_xms_table[cache_xms_stat+ce]b=2 then
+		{
+		co32=peek cache_xms_table|(ce*4)
+		cache_addr=ce*diskc_size
+		write_disk
+		cache_xms_table[cache_xms_stat+ce]b=1	;reset to read only.
+		}
+	    ce++
+	    }
+	}
+    }
+
+;==============================================================================
+
+#if 0
+
+function fread(fadd,flen,buffadd)
+    {
+    fa32=peek fadd
+    seek #10,fa32
+    r=read #10,flen to buffadd
+    }
+
+function fwrite(fadd,flen,buffwrt)
+    {
+    fa32=peek fadd
+    seek #10,fa32
+    write #10,flen from buffwrt
+    }
+
+#endif
+
+;==============================================================================
+
+#if 1
+
+function fread(fadd,flen,buffadd)
+    {
+    fa32=peek fadd
+
+    dd32=fa32 and 0fffff800h
+    doff=(low fa32) and diskc_mask
+
+    dlen=diskc_size-doff
+    if dlen>=flen then mlen=flen
+    else mlen=dlen
+
+    read_cache(doff,buffadd,mlen)
+
+    if mlen=flen then return
+
+    dd32+=diskc_size
+    read_cache(0,buffadd+mlen,flen-mlen)
+    }
+
+function fwrite(fadd,flen,buffadd)
+    {
+    fa32=peek fadd
+
+    dd32=fa32 and 0fffff800h
+    doff=(low fa32) and diskc_mask
+
+    dlen=diskc_size-doff
+    if dlen>=flen then mlen=flen
+    else mlen=dlen
+
+    write_cache(doff,buffadd,mlen)
+
+    if mlen=flen then return
+
+    dd32+=diskc_size
+    write_cache(0,buffadd+mlen,flen-mlen)
+    }
+
+#endif
+

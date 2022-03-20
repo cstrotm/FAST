@@ -1,0 +1,230 @@
+This file is part of FAST (Fast PC Compiler).
+
+FAST is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+FAST is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with FAST.  If not, see <http://www.gnu.org/licenses/>.
+
+      ==================== FBMENU Documentation ====================
+
+FBMENU - FastBase Menu Program (for use with any programs/options)
+======
+
+(c) Copyright Peter Campbell Software 1993, 1994
+
+Introduction
+------------
+
+FBMENU is designed as an easy to use reliable menu system.
+
+FBMENU's advantages over other menu programs include:
+    - small memory requirements (10-12K)
+    - easy to use script 'language'
+    - multi user
+    - security features
+
+FBMENU will work with any DOS programs that can be executed from the command
+line (including Windows). Some time delay backup systems will cause problems
+because they do not relinquish control to FBMENU for display and input.
+
+Setup
+-----
+
+The file FBMENU.M must be in the current directory where ever the FBMENU
+program is executed from.
+
+If installing FBMENU on a single user DOS machine then include FBMENU.COM and
+FBMENU.M in the root directory.
+
+If installing FBMENU on a network then include the FBMENU.COM and FBMENU.M
+files in the user's login directory (or \LOGIN if using one directory).
+
+The command "FBMENU n" must be included in the autoexec.bat file to load
+the menu program. This command must be in the user or system login script
+on a network as "#FBMENU n".
+
+"n" represents the security level for the user using this menu.
+A level below 9 will disable the ESC key (no access to DOS).
+
+To control security levels on a network the following code could be
+implemented into the login script for all users:
+
+    IF "%GROUP%" = "SALES" THEN #FBMENU 1
+    IF "%GROUP%" = "ADMIN" THEN #FBMENU 3
+    IF "%GROUP%" = "SUPER" THEN #FBMENU 9
+
+Once FBMENU has been loaded into a computer the menu file is active and cannot
+be changed - regardless if another user has logged in or the fbmenu.m file
+has changed.
+
+For security reasons it is best to manually check the user group or user name
+before allowing special functions.
+
+Script Definition
+-----------------
+
+The fbmenu.m script language uses the first letter of each line as a command,
+the sequence of a script file usually takes the following format:
+
+header options:
+
+    T	<title>
+    F	<function key>
+
+menu options:
+
+    M	<menu>
+    I	<item>
+
+process options:
+
+    D	<dos command>
+    S	<sub menu>
+    G	<get input>
+    X	<exit>
+
+
+The first part of the menu file must always define the title and function
+keys (both are optional).
+
+Title
+-----
+
+The default title is "(c) The FastBase Development Company Ltd".
+This is printed in the top part of the screen.
+
+If the first line of the script file starts with a capital "T" then the
+rest of the line is assumed to be the title.
+
+eg: TFastBase Development Company
+
+Function Keys
+-------------
+
+The line at the bottom will show all available function keys.
+If you define function keys then define them in order (ie: the first
+function key definition is F1, F2, F3 etc).
+
+Function keys can have the same process options as menus - this includes
+"D" for DOS commands, "S" for sub menus, "G" for getting input and "X" to
+exit. See the MENU option for more details.
+
+eg: FDOS	    <F1:DOS>
+      DCLS	    <dos command: cls>
+      X 	    <exit to DOS prompt>
+
+    FXTG	    <F2:XTG>
+      DCD\XTGOLD    <change directory>
+      DXTG	    <execute XTG>
+
+
+The following sections in the script file describe the individual menus,
+menus are numbered from 0 to 999 - in order of definition.
+
+Menus
+-----
+
+A menu is defined with a title and items - each item can have process
+options for DOS, sub menus, getting input and exiting.
+Menus can have an optional colour code.
+
+A menu item has an optional security level, name and process options.
+
+eg: MApplications Menu		<menu name: Applications Menu>
+      IAccounting System	  <item: Accounting System>
+	DF:			    <change to F drive>
+	DCD\FBASE		    <change to FBASE directory>
+	DFBM			    <run FastBase>
+      IWordPerfect		  <item: WordPerfect>
+	DF:			    <change to F drive>
+	DCD\WP51		    <change to WP51 directory>
+	DWP51			    <run WordPerfect>
+      I3,Network Functions	  <item: Network Functions, security 3+ only>
+	S1			    <display sub menu number 1>
+
+The "D" DOS command option is used to perform any DOS command.
+This option can also be used with programs which require input besides DOS
+including programs like DEBUG.
+The command is executed exactly as if it was manually entered.
+
+When a menu item is selected no assumptions can be made about which drive
+or directory is current.
+
+The "S" sub menu option will display the menu number specified, the menu will
+always appear slightly overlapping the previous menu. Pressing the ESC key
+always returns to the previous menu.
+
+The "G" get command allows input from the keyboard for parsing parameters to
+DOS commands.
+
+eg: IDirectory		    <item: Directory>
+      G1,Drive? A,B,C	      <prompt: Drive? A,B,C>
+      DDIR %1:		      <dos directory, eg: DIR B:>
+      DPAUSE		      <pause after directory>
+
+The first parameter after the "G" is the maximum length of input allowed,
+this is physically set to 50 but there is no default - a length must be
+specified.
+
+If more than one input is required then specify several "G" lines.
+Each subsequent "G" will represent the DOS parameter %1, %2, %3 etc.
+
+The "X" exit option returns the user to the DOS prompt.
+To return to FBMENU type "FBMENU". To simplify this rename or copy FBMENU.COM
+to a shorter name eg: "MENU.COM" or "M.COM".
+
+
+Screen Saver
+------------
+
+The screen saver will appear automatically after 10 minutes.
+To manually start the screen saver press ALT-S.
+
+The messages that appear are randomly based on pre-formatted words, nouns
+and adjectives. There is a version of the menu floating around with rude
+messages (please advise if you have this version and it can be replaced with
+the more sedate version).
+
+
+Terminating FBMENU
+------------------
+
+If you have started FBMENU but the script file is wrong you can abort the
+running version of fbmenu and re-load it after making your changes.
+
+This option only applies if fbmenu was started with level 9 security.
+Press ALT-X at the main menu (menu 0).
+
+
+Colour Codes
+------------
+
+The colour codes for the menu are made up as follows:
+
+    Background*16 + [8 for bright] + Foreground
+
+0 = Black
+1 = Blue
+2 = Green
+3 = Cyan
+4 = Red
+5 = Magenta
+6 = Yellow/Brown
+7 = White
+
+To make blue background with bright yellow text the colour code would be:
+
+    1*16 + 8 + 6 = 30
+
+eg: M30,Yellow Menu
+
+      ==================== FBMENU Documentation ====================
+

@@ -1,0 +1,52 @@
+This file is part of FAST (Fast PC Compiler).
+
+FAST is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+FAST is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with FAST.  If not, see <http://www.gnu.org/licenses/>.	
+
+	=================== STICK COMMUNICATIONS ====================
+
+STICK: PC-PC Communications
+===========================
+
+(c) Peter Campbell Software 1994.
+
+3rd October 1994.
+
+
+Stick communications is designed for support personnel to connect to client
+computers using MODEMs at 9600+.
+
+The client computer must run "STICKR" - once this has loaded the support
+person may dial into the computer using their MODEM with "STICK".
+
+
+The syntax for STICK is "STICK phone_number".
+Record commonly used phone numbers in a menu program (such as fbmenu).
+
+When a connection is made a popup box appears on the client's computer
+saying a support person has connected. Both the support person and the
+client can use the keyboard to talk to the running application.
+
+The support person can do anything the client can do via the keyboard.
+
+Any DOS application can be run (provided in text mode).
+
+When the support person wishes to disconnect they press Ctrl-Shift-Escape
+(left hand of the keyboard). A popup box tells the client the connection
+has been terminated.
+
+Further support for different MODEM configurations and other applications
+can be provided upon request.
+
+	=================== STICK COMMUNICATIONS ====================
+

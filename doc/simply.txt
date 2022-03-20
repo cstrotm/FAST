@@ -1,0 +1,64 @@
+This file is part of FAST (Fast PC Compiler).
+
+FAST is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+FAST is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with FAST.  If not, see <http://www.gnu.org/licenses/>.	
+
+						PETER CAMPBELL SOFTWARE
+
+    =======================================================================
+
+Simply Shareware
+3rd October 1994.
+
+Dear Sir
+
+I received a copy of your newsletter in the PC WORLD magazine today.
+It has sparked up enough interest for me to submit my programs for your
+evaluation and potential inclusion in the newsletter and availability to
+your clients.
+
+I have submitted shareware programs to overseas libraries (pc-sig, JCS and
+several others). All companies have accepted the programs and over the
+last few years I have had about 50 registered users (none from NZ).
+
+I have enclosed some printed notes which are also included as .DOC files
+in each of the relevant ZIP files.
+
+I also have a company called The FastBase Developement Company Ltd. which
+myself and two others setup once I had completed the FastBase 4GL.
+
+Please evaluate these programs and provide me with any feedback.
+Feel free to distribute these programs in your shareware library or by any
+other means as you see fit.
+
+
+The programs included (as detailed in the notes)
+
+    STICK.ZIP	    - Carbon copy type program, uses less memory.
+    FBMENU.ZIP	    - Menu program.
+    FAST.ZIP	    - Fast compiler and 80+ example programs.
+    SOFA.ZIP	    - Sofa assembler with source code.
+    FBDEMO.ZIP	    - FastBase demonstration application (accounting).
+
+
+I have several other programs which may be of use to others as shareware,
+if you are interested I shall forward these to you with more thorough
+and uptodate documentation.
+
+
+Yours faithfully
+
+
+
+Peter Campbell.
+

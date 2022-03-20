@@ -1,0 +1,79 @@
+This file is part of FAST (Fast PC Compiler).
+
+FAST is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+FAST is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with FAST.  If not, see <http://www.gnu.org/licenses/>.
+
+
+To: Veerre
+
+11-04-1995
+
+
+I received your fax regarding the TSR program to detect files in Novell.
+
+There are several points which are causing you problems:
+
+The find first command must not be in the 'on int' section, this should
+be in a program procedure similar to that in my TSR.F skeleton file.
+
+Example:
+
+proc program
+    {
+    using=1
+    activate=0
+    old_psp=psp:psp reg cs	    ; <<<< IMPORTANT
+
+    ;find first here etc
+
+    psp old_psp
+    using=0
+    }
+
+;== Main entry =============================================================
+
+activate=0  ;Currently not trying.
+on int 1
+    {
+    if ((peek 0|417h) and 3)=3 then activate=1
+    if activate and (inds[indo]b=0) then program
+    }
+
+
+The find first fails because the program segment prefix and other items
+have not been setup - these commands must be processed before running
+any DOS commands - simply checking the INDOS flag is not enough.
+
+PS: also for accuracy check the INDOS flag before using the 'timer'
+function - this is a BIOS function but may not be re-entrant and could
+also cause problems.
+
+Instead of using 'timer', have your own variable, use it this way...
+
+    counter = 0
+
+    on int 1
+	{
+	;check indos[]
+	counter++
+	if counter>(18*8) then
+	    {
+	    ;check file
+
+	    counter=0
+	    }
+	}
+
+This also removes the potential problem when the timer resets to 0 at the
+end of each day - your program would stop working.
+

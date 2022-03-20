@@ -1,0 +1,24 @@
+
+	    WT HELP  --	 WORD TURBO WRITTEN BY PETER CAMPBELL 1988.
+
+ FUNCTION KEYS	  ALT-S	 Split line		  ALT-N	 Edit next file
+ÚÄÄÄÄÄÄÂÄÄÄÄÄÄ¿   ALT-J  Join lines		  ALT-X  Exit WT (save?)
+³  F1  ³  F2  ³	  ALT-U	 Undo changed line
+³ HELP ³ EDIT ³	  ALT-E	 Erase line		  ALT-B	 Start block mark
+ÃÄÄÄÄÄÄÅÄÄÄÄÄÄ´	  ALT-K	 Erase to end of line	  ALT-A	 Mark from beginning
+³  F3  ³  F4  ³	  ALT-G	 Goto line		  ALT-Z	 Mark to end
+³ SAVE ³ LOAD ³   ALT-1  Set place.		  ALT-W  Mark word
+ÃÄÄÄÄÄÄÅÄÄÄÄÄÄ´   ALT-2  Return to place.	  ALT-L  Mark line
+³  F5  ³  F6  ³   ALT-T  Join line (remove gap)   ALT-R  Repeat line
+³ FIND ³ REPL ³
+ÃÄÄÄÄÄÄÅÄÄÄÄÄÄ´   Shft-F5  Find next string	  Shft-Minus  Delete to scrap
+³  F7  ³  F8  ³   Shft-F6  Replace next string	  Shft-Plus   Copy to scrap
+³ LEFT ³ RGHT ³ 				  Shft-Insert Insert scrap
+ÃÄÄÄÄÄÄÅÄÄÄÄÄÄ´   Shft-F7  Move left then down
+³  F9  ³  10  ³   Shft-F8  Move right then down   CTRL-T    Top of screen
+³ PRNT ³ SPCE ³ 				  CTRL-C    Centre screen
+ÀÄÄÄÄÄÄÁÄÄÄÄÄÄÙ   ALT-F3   Save & remove file	  CTRL-B    Bottom screen
+		  ALT-SPCE Run compiles Programm
+		  CTRL-E   Expand buffer (64K)	  CTRL-Y    Delete line
+						  CTRL-Bksp Delete Line
+

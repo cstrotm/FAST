@@ -1,0 +1,40 @@
+This file is part of SOFA (Super Optimsed Fast Assembler).
+
+SOFA is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+SOFA is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with SOFA.  If not, see <http://www.gnu.org/licenses/>.
+	
+	
+SOFA - Super Optimsed Fast Assembler
+====================================
+
+(c) Copyright Peter Campbell Software 1988-1994
+
+SOFA is an 8088 (and semi-80386) assembler. The syntax is based lightly on
+A86 and CHASM (two other shareware assemblers).
+
+SOFA comes with full assembler source code that gives an idea of the syntax
+used by SOFA (very raw and simple compared with MASM).
+
+SOFA can also assemble itself - sofa sofa;
+
+Sofa's features include quick assembly time (thousands of lines per second),
+conditional compilation, include files and many more.
+
+If you are familiar with 8088 assembly language then you will be able
+to understand more of sofa's features by view the source code.
+
+Another program written in assembly language (FAST.COM) is provided
+in shareware. Fast is another computer language similar to Basic, Pascal
+and C. Fast provides users with the speed and power of assembly language
+without using the low level functions.
+

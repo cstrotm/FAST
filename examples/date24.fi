@@ -1,0 +1,64 @@
+
+;==============================================================================
+; check if time exceeds 24hr, update flag if so
+;==============================================================================
+
+;23rd August 1994
+;This file should be included in any program after waiting for keyboard
+;input - where the program may run unattended for 48hrs or more.
+;
+;Usually DOS updates the date after every 24hrs but many programs do not
+;go back to the DOS prompt if running for a long time or over a weekend.
+;
+; previous code may have been: wait for keypressed
+;
+; new code should read: wait for keypressed
+;			#include date24.fi
+;
+
+;current code commented out - see notes below.
+;program changed so that it reads the clocks date then sets the dos date
+;this occurs every time the program is included/run
+
+#if 0
+reg ax=0:int 1ah
+date24a=low reg ax
+
+if date24a then
+    {
+    ;set flag to say day has changed over
+    reg ax=0100h:int 1ah
+
+;this code may not work because the real time clock could be slightly
+;behind the computers 24hr counter.
+
+    ;read date from clock
+    reg ax=0400h:int 1ah	;CH=19/20, CL=year, DH=month, DL=day
+    date_cx=reg cx
+    date_year=(high date_cx)*100+low date_cx
+
+    ;set date in DOS
+    reg cx=date_year
+    dos 2bh			;DX is unchanged
+
+    beep	;signal end of day
+    }
+#endif
+
+;==============================================================================
+
+;substituted code
+
+;read date from clock
+reg ax=0400h:int 1ah	    ;CH=19/20, CL=year, DH=month, DL=day
+date_cx=reg cx		    ;BINARY CODED DECIMAL (ALL VALUES)
+date_dx=reg dx
+
+date_year=bcd2dec(high date_cx)*100+bcd2dec(low date_cx)
+date_month=bcd2dec(high date_dx)
+date_day=bcd2dec(low date_dx)
+
+;set date in DOS
+reg cx=date_year,dx=date_month*256+date_day
+dos 2bh
+

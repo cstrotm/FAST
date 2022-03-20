@@ -1,0 +1,1337 @@
+ COMMANDS
+ ========
+
+Commands are FAST functions in effect, which don't return any value, they
+perform a task with no resulting value to return.
+
+Notes:      +   represents a command which is considered advanced.
+            $$$ represents a command which is not working yet - work needed.
+
+
+ASCIIZ      ASCIIZ n
+
+Changes the end character of the string at address n to 0.
+The string at address n must be defined using STRING and input from the
+keyboard using INPUTS.
+
+ASCIIZ strings are used for making calls to dos (either using FAST's file
+commands or direct to DOS via int 21h). ASCIIZ strings usually represent
+file or directory names.
+
+To see how a string is stored in memory then see the STRING command.
+
+ASCIIZ = ASCII ZERO, any string of ASCII characters with a 0 bytes to mark the
+end.
+
+
+BEEP        BEEP
+
+'PRINTs' the bell character (7) using the standard output.
+
+
+BREAK       BREAK
+
+Executes the active ON BREAK statement.
+Same as pressing CTRL-C or CTRL-SCROLL_LOCK.
+
+
+BRIGHT      BRIGHT n
+
+Sets the brightness used by the PRINT commands.
+Sets the 'b' bit in the COLOUR variable.
+
+
+CALL      + CALL address
+
+The code at the specified address is executed.
+
+If the address is a SEGMENT|OFFSET then an inter-segment call is used, to return
+he subroutine must return using a RETF (return far).
+
+If the address is just an OFFSET (ie same code segment) then returning from the
+subroutine is done using a RET assembly instruction or RETURN command.
+
+
+CHANGE      CHANGE DISK b
+
+Changes the default drive to b, b=0 for A:, b=1 for B: etc...
+
+CHANGE DISK does not include error checking, to test if a CHANGE DISK is
+sucessful then test using the function CDISK.
+
+Example:
+
+CHANGE DISK new_drive
+if CDISK<>new_drive then error 15   ;Invalid drive spec.
+
+
+CHANGE      CHANGE DIR pathname
+
+Sets the current directory to a new pathname, with ERROR checking.
+
+
+CLOCKS    + CLOCKS n
+
+Sets the new timer tick frequency to n.
+This should not normally be changed becuase it effects the computers time
+but can be useful for doing crucial timing at your own speeds.
+
+The timer frequency is 1193181 / n.
+
+Example.
+
+CLOCKS 29829    ;1193181 / 40
+ON INT 1
+    {
+    ;this is done 40 times a second.
+    }
+
+wait for key=27     ;Until escape is pressed.
+STOP INT 1
+CLOCKS 0            ;Reset timer tick to 18.2 second intervals (default).
+
+
+CLOSE       CLOSE #n
+
+Closes the open file (opened by OPEN or CREATE), includes ERROR checking.
+
+
+CLOSE       CLOSE WINDOW[S]
+
+Closes all open windows, does nothing if no windows are open.
+If singular (CLOSE WINDOW) but there are no open windows then an error 6 will
+be generated (invalid [window] handle), includes error checking.
+
+
+CLS         CLS
+
+Clears the current display page (see multiple PAGEs).
+
+To clear a text screen firstly set the COLOUR variable to the default
+background colour, eg 7 or 15.
+
+To clear a graphics screen set the colour to 0.
+
+
+COLOUR      COLOUR b
+COLOR
+
+Sets the colour value used by CLS, LINE, PLOT, PRINT, PRINTS, PRINTM & SCROLL.
+COLOUR can be used as a variable, except COLOUR b is used rather than COLOUR=b.
+
+How is the colour used for?
+
+TEXT: The colour is determined using 8 bits - 'fpppbiii' where
+            f   = FLASH on/off
+            ppp = PAPER (background) colour
+            b   = BRIGHT on/off
+            iii = INK (text) colour
+GRAPHICS: Colour is determined where COLOUR = 'm-----ii'
+            m   = mode where 0=normal, 1=toggle dot on/off (exclusive OR).
+            ii  = INK (foreground) colour.
+
+Note ! COLOR is the same as COLOUR (two spellings - a first eh!, now all you
+foriegners can't complain).
+
+The colour values for the text colour and background colour are:
+
+            Decimal   Binary   Colour
+            -------------------------
+              0        000     Black
+              1        001     Blue
+              2        010     Red
+              3        011     Magenta
+              4        100     Green
+              5        101     Cyan
+              6        110     Yellow
+              7        111     White
+~CONST       CONST[32] label=n [,...]
+
+Assigns a constant value to a unique label.
+
+CONST defines 16 bit labels (integer/word type), whereas CONST32 defines 32 bit
+labels (double word).
+~CREATE      CREATE #n,filename [,reclen]
+
+Creates a file, opens it for IO as file #n. Includes ERROR checking.
+
+If the file already exists then the original is deleted.
+~CURPOS      CURPOS=n
+
+Sets the cursor position where n = y*256 + x.
+The complementary function is also called CURPOS.
+~CURSOR      CURSOR y,x
+
+Sets the cursor position used by PRINT DOS to row y, column x.
+~CURTOLOC    CURTOLOC
+
+CURSOR TO LOCATE sets the PRINT postion to the same as the CURSOR position.
+The flashing CURSOR is the next position for PRINT DOS commands to print at
+whereas the LOCATE or LOCPOS position is for the PRINT commands.
+
+CURTOLOC is the same as: LOCATE HIGH CURPOS,LOW CURPOS
+                     or: LOCPOS=(CURPOS/256)*160+(CURPOS AND 255)*2
+~DATA        DATA[B] n,string [,...]
+
+Stores the values n and the strings in memory.
+DATA is for words (strings not allowed), DATAB is for bytes and strings.
+Data must not be in the running part of a program because it will be run as
+machine code. INLINE is the same as DATAB but makes it clear for a programmer
+to see that INLINE will contain machine code. INLINE comes from the Pascal
+command.
+
+Put DATA statements at the end of a program.
+
+Note ! n must be constant (not an undefined expression during compile time).
+~DEALLOCATE  DEALLOCATE segment
+
+The memory segment is deallocated (freed), no more references to the memory
+segment can be made. Includes ERROR checking.
+
+Typically DEALLOCATE is used to free ALLOCATEd memory.
+
+Note ! TERMINATE & STOP automatically deallocate all memory used, STOP RESIDENT
+       can be used to return to DOS while still retaining all allocated memory.
+~DELETE      DELETE filename
+
+Deletes the file, with ERROR checking.
+~DIM     $$$ DIM[B] var(n[,m])
+
+DIM = word elements, DIMB = bytes.
+Sets dimensions for an array to n [*m] elements.
+All the elements of an array can be used individually.
+
+Example.
+
+DIM board(8,8)
+board(4,4)=1:board(4,5)=2
+board(5,4)=2:board(5,5)=1
+PRINT board(x,y)
+~DIR         DIR filename,address [,b]
+
+Creates a table of directory entries at address.
+The optional b is for specifying an alternate attribute search from the
+default which finds all files of normal and/or archive and/or read only.
+See FIND FIRST for a file attribute break down.
+
+The first word of the table contains the number of file entries in the table.
+Each entry after that is 13 bytes long, containing a "name.ext,0".
+
+               offset
+Example table:  0000    2                       ;2 entries
+                0002    'FAST.COM',0,?,?,?,?    ;0=chr 0
+                000F    'FASTL.HLP',0,?,?,?     ;?=unknown value.
+~DISABLE     DISABLE BREAK
+
+Sets the ON BREAK statement to NULL, effectively disabling the BREAK key.
+
+~DISABLE   + DISABLE SERIAL
+
+Serial Communications.
+Before returning to DOS the serial port interupts must be disabled, DISABLE
+SERIAL does this. ENABLE SERIAL will initialise the COM1 port and receive
+characters for you.
+
+Example: See ENABLE SERIAL.
+~DISABLE   + DISABLE INTERUPTS
+
+Disables all interupts, such as the clock, keyboard & disk.
+This is probably only useful for hardware controlling software.
+
+Note ! DISABLE INTERUPTS is the same as assembler CLI.
+~DOS       + DOS b [(b)]
+
+Performs DOS function calls.
+
+*** b is a hexadecimal number by default.
+
+b is the function number (AH register),
+(b) is the sub-function (AL).
+
+Example.
+
+DOS 4d(0)    ;Same as ASM - MOV AX,4d00h & INT 21h
+~ENABLE      ENABLE BREAK
+
+Enables the break key, makes the BREAK key do what it did before the last
+DISABLE BREAK command.
+~ENABLE    + ENABLE SERIAL [n]
+
+Serial Communications.
+Enables the COM1 serial port to send interupts for receiving data.
+Every time the COM1 port receives a byte it calls interupt 0ch.
+
+ENABLE SERIAL firstly initialises the COM1 port to your settings if provided,
+eg ENABLE SERIAL 0a3h. See Parameters below.
+
+After ENABLE SERIAL, your program just continues to run as normal.
+Whenever a character is received, a special handler will automatically put the
+byte into a buffer. This buffer is serial_size bytes long and at segment
+serial_seg. The byte is put at offset serial_head and then serial_head is
+incremented, wrapped around if buffer fills up.
+
+The variables serial_seg, serial_head and serial_size are internal FAST
+variables. The ENABLE SERIAL interupt will alter serial_head automatically.
+
+Example to clarify things.
+--------------------------
+serial_head=0
+serial_size=10000
+serial_seg=allocate serial_size/16+1
+enable serial 0a3h      ;2400 8N1.
+
+forever
+    {
+    while serial_head<>serial_size
+        {
+        print dos chr serial_seg[serial_tail]b;
+        serial_tail++
+        if serial_tail>=serial_size then serial_tail=0
+        }
+    if key=27 then disable serial:stop
+    }
+
+Parameters
+----------
+Initializes the baud rate, parity, stop-bit, and word length parameters for
+the serial port COM1.
+
+The optional parameter of ENABLE SERIAL uses the format: bbbppsww
+
+            b b b               p p              s              w w
+    -----------------------------------------------------------------------
+            Baud rate           Parity           Stop bits      Word Length
+    Bit:    7 6 5               4 3              2              1 0
+            0 0 0    110        0 0  None        0  One         1 0  7 bits
+            0 0 1    150        0 1  Odd         1  Two         1 1  8 bits
+            0 1 0    300        1 0  None
+            0 1 1    600        1 1  Even
+            1 0 0  1,200
+            1 0 1  2,400
+            1 1 0  4,800
+            1 1 1  9,600
+~ENABLE    + ENABLE INTERUPTS
+
+Enables all interupts, see DISABLE INTERUPTS.
+
+Note ! ENABLE INTERUPTS is the same as assembler STI).
+~ENDFOR      ENDFOR
+
+Drops out of the current FOREVER loop to the line below it.
+
+$$$ At present ENDFOR is of no practical use becase it can't be used in an
+    IF THEN ELSE statement.
+~ERROR       ERROR [n]
+
+Sets the ERROR variable to value n and the current ON ERROR statement is
+executed.
+
+If n is not specified then the current ERROR value is used.
+~ERROR       ERROR MSG filename [,n]
+
+Loads the file (created using MAKEMSG or MERR) and then prints the error
+message for error n (printing is done using the standard IO - PRINT DOS). If n
+is not specified then the ERROR variable is used.
+
+Notes ! If there isn't 16k memory free or the file is missing or the error
+        number doesn't exist then the following message is printed -
+        Error n [DOS=de]  ;de=the DOS error.
+      - If ERROR MSG gets its own error it does not recursively call ON ERROR.
+
+Example.
+
+ON ERROR
+    {
+    ERROR MSG "\dos.err"
+    PRINT DOS "!"
+    STOP
+    }
+~EXECUTE $$$ EXECUTE filename,n
+~FILL        FILL[B] length FROM address WITH n
+
+Fills length memory locations starting from address with the word value n
+(byte value if FILLB).
+
+Length is the count of words (FILL) or bytes (FILLB).
+~FIND        FIND FIRST filename [,b]
+
+Finds the first occurrence of a filename - optional wildcards.
+Includes ERROR checking.
+
+b is an alternate file attribute for finding files.
+    Attributes:    Bit    File Type
+                76543210
+                .......1  Read only
+                ......1.  Hidden
+                .....1..  System
+                ....1...  Volume label
+                ...1....  Directory
+                ..1.....  Archive
+
+Combinations: If the attribute (b) is set to 0 (the default) then all read
+              only, archive & normal files are found. If the directory, hidden
+              or system bits are set then they are found aswell as normal files.
+
+
+The information for the file found is at address:
+              DTA SEGMENT|DTA OFFSET + 15h (1)  = File attribute.
+                                     + 16h (2)  = Time stamp.
+                                     + 18h (2)  = Date stamp.
+                                     + 1Ah (4)  = File size in bytes.
+                                     + 1Eh (13) = File name,0 (ASCIIZ).
+
+Note ! FIND NEXT is used to find all subsequent files in the directory.
+~FIND        FIND NEXT
+
+As for FIND FIRST but finds all subsequent files.
+FIND NEXT must be used for every file.
+Includes ERROR checking.
+
+Note ! Error 18 means no more files,
+
+Example.
+
+#ERRORS OFF
+FIND FIRST "*.*"   ;Find the first, will abort
+GOTO entry
+FOREVER
+    {
+    FIND NEXT              ;Next file.
+#ERRORS ON
+    entry:
+    IF ERROR=18 THEN GOTO finished
+    IF ERROR THEN ERROR    ;Handler genuine errors.
+    ;Process File.
+    }
+finished:                  ;Complete.
+~FLASH       FLASH b
+
+Determines whether text PRINTed will be flashing or not.
+Sets the 'f' bit in the COLOUR variable.
+~FNAME       FNAME string
+
+FNAME (FileNAME) is the same as DATAB string,0 but is generally more
+convienient. Appending the 0 to the name makes it an ASCIIZ string for file
+commands. Filenames defined using FNAME are easily used.
+
+Example.
+
+OPEN #2,output_file
+...
+output_file:
+FNAME 'file.lst'
+~FOR         FOR var=n TO last [STEP step]
+
+The FOR command 1) sets var=n,
+                2) calculates the last value for the variable,
+                3) executes the instructions until a NEXT is encountered,
+                4) Adds the increment to var,
+                5) If var <= last then go back to step 3.
+
+Note ! FOR-NEXT loops can be nested to about 20 levels maximum.
+~FOREVER     FOREVER statement
+
+Executes the statement forever or until exited. Common ways to exit a forever
+are: GOTO, BREAK & ENDFOR.
+
+GOTOs are valid in and out of FOREVER statements.
+~FREE      + FREE MEMORY
+
+Frees memory in excess of what the FAST program requires, leaving the minimum
+amount of memory for code, variables, windows & stack.
+
+Note ! FREE MEMORY is done automatically at program startup (only here for old
+       code compatibility, not needed now).
+~FREE      + FREE ALL MEMORY
+
+Fress all memory used by the FAST program including the code.
+
+FREE MEMORY is provied for programs which may remain memory resident for some
+time but terminate at some stage.
+
+Notes ! TERMINATE and STOP will automatically free all memory.
+~FUNCTION    FUNCTION funcname [(var [,...])] statement
+
+Defines a function with an optional number of parameters.
+All functions can be called from within themselves but variables are NOT
+remembered.
+
+When a function is used any parameters missing from the list have an undefined
+value.
+
+Example.
+
+FUNCTION rnd_range(max)
+    {
+    RETURN RND MOD (max+1)
+    }
+PRINT rnd_range(200)
+~GOSUB       GOSUB label
+
+Program jumps to a subroutine - when a RETURN is reached the program continues
+from the command after GOSUB.
+
+Note ! If using PUSH or POP then keep the STACK intact.
+~GOTO        GOTO label
+
+Program jumps to the label.
+~HALT      + HALT
+
+Halts the CPU using the assembler HALT instruction, used for timing and
+synchronisation, or as a delay until the next interupt.
+~HANDLE    + HANDLE #b,n
+
+Overrides the file handle for any FAST files from 1 to 12.
+N could be the handle of a standard DOS output handle. Eg handles from 0 to 4.
+
+Gets your hands on the DOS technical reference for some very useful info on
+files and handles, or someone who has read it.
+
+In brief
+--------
+A handle is a number which represents a file that has been OPENed or CREATEd.
+All FASTs file comamnds & functions use #1 to #12 to represent a file.
+In reality #1, #2 ... #12 are just variables which contain the handle number
+of open files.
+
+For example.
+
+OPEN #1,myfile  ;Sets #1=the next availble DOS file handle number, typically 5.
+
+DOS has 5 default handles which can also be used for input and output but they
+don't represent files. They are:
+
+            0 Standard input device, input can be redirected.
+            1 Standard output device, output can be redirected.
+            2 Standard error device, cannot be redirected.
+            3 Standard auxiliary device.
+            4 Standard printer device.
+
+For example to write bytes to the standard auxiliary device using FAST commands
+such as WRITE #1,50 FROM address could be done, try...
+
+            HANDLE #1,3     ;Sets #1 (a variable containing a file handle) to 3.
+
+            WRITE #1,50 FROM address    ;Write bytes.
+
+Note ! The five standard DOS handles (0-4) don't have to be opened before use.
+~HGRAPHICS   HGRAPHICS
+
+Turns a hercules (or compatible) graphics card into graphics mode, Screen
+resolution of 720 rows and 348 columns.
+The SCREEN command cannot change mode on an HGA or compatible card.
+To display SPRITEs, PLOT dots or draw LINEs then the MODE command must be used
+as MODE 720,mode for setting which mode is being used.
+
+Example.
+
+HGRAPHICS
+MODE 720,AND
+
+Note ! HTEXT puts the HGA card back into text mode.
+~HTEXT       HTEXT
+
+Puts the hercules (or compatible) graphics card back into text mode, after
+using HGRAPHICS.
+~IF          IF n THEN statement [:...] [ELSE statement [:...]]
+
+IF the value for n is true (not 0) then the first statement is executed. If an
+ELSE statement is provided and the value is false then the second statement is
+executed.
+IFs can be nested to a maximum of approximately 30 levels.
+
+Example.
+
+IF score>75 THEN PRINT "Excellent"
+    ELSE IF score>50 THEN PRINT "Pass" ELSE PRINT "Fail"
+~INK         INK n
+
+Sets the ink (text) colour used by the PRINT commands.
+Sets the 'iii' bits in the COLOUR variable.
+~INLINE    + INLINE b [,...]
+
+All values b are assumed to be for a machine code subroutine.
+Use the DOS utility debug to write a subroutine then put the machine code in
+the INLINE command.
+
+Note ! INLINE is exactly the same as DATAB, INLINE should be used for any
+       machine code to show that it is for running (unlike data).
+
+$$$ FAST will soon be able to compile SOFA compatible assembly code and
+    #INCLUDE SOFA source files.
+~INPUTS      INPUTS n
+
+Gets a string input from the keyboard and stores it as a STRING at address n.
+The string format is described by the STRING command.
+
+There is an extended input option provided in the EXTINPUT.FI file, include
+this into your source files then change the INPUTS commands - read the file for
+help on using the new functions.
+~INT       + INT b
+
+Calls the specified software interupt.
+*** b is a hexadecimal number by default.
+
+There are 256 interupt vectors, to set or read their values use the SETINT
+command and the GETINT function.
+To find which interupts do what - read the DOS technical reference or any
+half-way decent assembly language book for the PC Compatible.
+
+Note ! b is a hexadecimal number, same as for the DOS command.
+
+Example.
+
+INT 17  ;(means 17 hexadecimal or 23 decimal).
+~IRET      + IRET
+
+Performs a return from interupt (same as assembler IRET).
+~JUMP      + JUMP address
+
+Like GOTO but can goto any segment|offset address within memory.
+Possible uses - Jumping to a program overlay.
+
+Example of program overlay.
+
+over_seg=ALLOCATE 2048          ;2048 paragraphs = 32k
+LOAD "over.com",over_seg|100h   ;Load overlay.
+JUMP over_seg|100h              ;Jump to start of the program.
+                                ;Note ! 100h is used as the start.
+~LET         [LET] var assignment n
+
+Assigns value n to the variable.
+See the VARS entries for possible ways of assigning variables a value.
+
+Example.
+
+LET a=20       ;same as a=20
+score+=20
+x++
+address=x*2+y*160
+~LINE    $$$ LINE x,y TO x,y
+
+Draws a line on the graphics screen using the current MODE setting.
+The line goes from the first x,y coordinate to the second x,y.
+The graphics screen should be set with both SCREEN and MODE commands. Eg if
+using a 320*200 graphics screen then MODE should be set using
+MODE 320,[AND] [OR] [XOR] : SCREEN 4
+
+The 'iii' bits of COLOUR are used to determine the colour of the dot on the
+screen. 2 colours use 1 bit, 4 colours use 2 bits.
+~LOAD        LOAD filename,address [,length]
+
+Loads the file into memory at address. Maximum load is 64K bytes.
+Includes ERROR checking.
+
+Three steps are done by the LOAD command:
+    1) OPEN filename
+    2) READ bytes to address, default is load up to 64k but can be over-ridden.
+    3) CLOSE file.
+~LOCATE      LOCATE y,x
+
+Sets the LOCPOS (PRINT location) to row y, column x.
+Same as saying LOCPOS = y*160 + x*2 (but LOCATE is more efficient).
+~LOCTOCUR    LOCTOCUR
+
+LOCATE TO CURSOR sets the CURSOR postion to the same as the LOCATE position.
+The flashing CURSOR is the next position for PRINT DOS commands to print at
+whereas the LOCATE or LOCPOS position is for the PRINT commands.
+
+LOCTOCUR is the same as: CURSOR LOCPOS/160,(LOCPOS MOD 160)/2
+~MAKE        MAKE DIR pathname
+
+Makes the specified directory, includes ERROR checking.
+~MODE        MODE r,m
+
+Tells the FAST graphics library which screen mode is being used.
+The MODE command should always be used in conjunction with the SCREEN command
+before using graphics commands such as PLOT, LINE, SPRITE & POINT.
+
+r = screen width in pixels; 320, 640 & 720 are currently supported.
+m = printing mode for PLOT, LINE & SPRITE; either AND, OR or XOR.
+
+AND, OR & XOR in animation terms:
+
+    AND will clear the background and print itself (dot or sprite) on screen.
+    OR  will merge itself with the current image on the screen.
+    XOR will inverse itself with the current image.
+
+AND would be used when the background can be wiped out.
+OR  is used for putting images on the screen over the top of each other,
+    generally not for animation.
+XOR is used for putting images over anything then removing them (by printing
+    in the same place, therefore removing itself) and printing it elsewhere.
+~MODIFY      MODIFY segment TO n
+
+Modifies the length in paragraphs of an ALLOCATEd segment of memory, includes
+ERROR checking.
+A block of memory can almost always be made smaller.
+Normally a segment can only be enlarged if no segments have been allocated
+since the one being modified.
+~MOVE        MOVE[B] length FROM address TO address
+
+Moves the number of words (or bytes if MOVEB) from the first address to the
+second address. The maximum number of words moveable at once is 32768, the
+maximum number of bytes is 65535.
+If length=0 then nothing is done.
+
+Note ! MOVE will never over-ride memory, special checks have been implemented
+       and so MOVE automatically inserts or deletes gaps where required.
+
+       In assembler terms, MOVE knows whether to set CLD or STD and whether or
+       not to add the length to the base registers.
+~NEXT        NEXT var [,...]
+
+Associated with a FOR loop, the STEP is added to the variable, if the variable
+is <= the last value then the statements between the FOR-NEXT are repeated.
+~NOISE       NOISE OFF
+
+Turns the sound off (speaker frequency = 0).
+~NOISE       NOISE duration,n
+
+Produces a noise for duration loops at frequency n. NOISE's duration represents
+approximately 1/20000th of a second (for 4.77MHz PC). Therefore NOISE 20,10 is
+1/1000th of a second. The duration of a sound command will vary greatly,
+depending on whether you run your program on the 4.77MHz PC or the 33MHz 80486.
+
+A frequency can be converted to n using: n = 1,331,000 / freq
+
+NOISE does not turn the speaker off when it has finished, so more noise can be
+made without interference, NOISE OFF turns the sound off when finsihed.
+To set the speaker on but do something else while the noise is on then use
+either the SOUND command with a long duration or NOSIE 1,n (1 means short
+delay).
+
+Note ! While NOISE is being executed nothing else will be done.
+~ON          ON TRACE statement
+
+Every line which is compiled while the ON TRACE statement is compiled will
+call the current ON TRACE statement.
+
+The ON TRACE statement will only be run if the program is traced using the
+FASTT command, 'FASTT filename'.
+
+To find all information on tracing search the word 'TRACE' AND 'TRACING'.
+
+Note ! The #ON TRACE flag should be OFF and not changed while compiling the
+       ON TRACE statement.
+~ON          ON ERROR statement
+
+When the ERROR command is used it calls this user-definable statement, the
+error number is stored in the ERROR variable.
+The address of where the error occurred is on the stack.
+If no ON ERROR statement is defined then the default is used.
+
+Example.
+
+ON ERROR
+    {
+    POP address
+    OPEN WINDOW severe
+    CURSOR 18,50
+    ERROR MSG "\dos.err"
+    PRINTH BIOS ", at address: ";address
+    WAIT FOR KEY=27
+    CLOSE WINDOW
+    STOP
+    }
+~ON          ON BREAK statement
+
+The ON BREAK interupt is set so that when the break key is detected, control
+transfers to the new ON BREAK statement.
+The ON BREAK statement automatically returns to the place were the break was
+detected using an assembler IRET instruction.
+
+Example.
+
+ON BREAK beep
+~ON          ON DEBUG statement
+
+Any lines that have the #DEBUG flag on will execute the current ON DEBUG
+statement while executing.
+
+The ON DEBUG statement could be used to display variables in a window or
+allow checking of special key presses etc.
+
+If no ON DEBUG statement is defined then the default statement tests the break
+key.
+
+Note ! The #ON DEBUG flag should be OFF and not changed while compiling the
+       ON DEBUG statement.
+~ON        + ON INT b statement
+
+Sets one of FASTs 12 interupts to perform a statement. b ranges from 1 to 12.
+Each interupt occurs 18.2 times every second.
+
+FASTs 12 interupts are seperate from the computers interupts (using the FAST
+INT, GETINT and SETINT commands) and different from DOS functions (using DOS).
+FASTs interupts are all attached to the computers interupt 08h which is the
+normal timer tick interupt.
+
+The command STOP INT b will stop an interupt.
+
+Note ! DOS functions and FAST commands which include error checking must not be
+       used inside ON INT statements becase they effect DOS.
+       To perform DOS functions during interupts the computer must not be
+       currently running any other DOS function, check this with the INDOS flag
+       and the ON IDLE interupt.
+
+All information on TSRs can be located by doing a search on TSR.
+~ON        + ON IDLE statement
+
+The idle interupt is intercepted by the ON IDLE comamnd (INT 28h).
+DOS calls interupt 28h whenever it is waiting for input from the keyboard.
+
+If you want to call the IDLE interupt within your own program simply use the
+command 'INT 28'.
+
+STOP IDLE restores the idle interupt to its state before the ON IDLE was used.
+
+ON IDLE can be used to detect when DOS is not doing anything (useful for TSR
+programs).
+~ON      $$$ ON CRITICAL statement
+~ON      $$$ ON KEY b statement
+
+When the specified key is read from the keyboard the statement is executed.
+b is a value within the range 32-127.
+~ON      $$$ ON SCAN b statement
+
+Same as ON KEY but SCAN codes are used to determine which key has been pressed
+(run sample program HEXD for scan values).
+When the specified key is read from the keyboard the statement is executed.
+b is a value within the range 0-132.
+~OPEN        OPEN #n,filename [,reclen]
+
+Opens the file as being file #n and it is ready for input & output, includes
+ERROR checking.
+
+An error occurs if the file doesn't exist (error 2), the CREATE command can be
+used to delete an existing file (if it exists) and start with a 0 length file.
+
+See also: CLOSE, SEEK, RECLEN, READ & WRITE.
+~OPEN        OPEN WINDOW n
+
+Opens a window on the screen.
+Windows can only be used in 80 column colour text mode, this is the default for
+almost all applications so this should be a small limitation.
+
+If OPEN WINDOW gets an error then this is handled by normal error checking.
+Error 4 occurs if no more windows can be opened - No more handles available.
+Error 8 occurs if no more window memory - Insufficient Memory, this can be
+fixed by increasing the size of #WINDOW MEMORY, it defaults to 1500 bytes.
+
+n is an address which points to a description of the window.
+The memory at n is structured as:
+    Address n = mode, options, x1, y1, x2, y2, colour, [text...,] eof.
+
+1) mode is 0, 1 or 2. Mode 0 prints the window with a boundary, no top line is
+   used. Mode 1 prints a top line for the windows heading and are used for
+   selecting items (ie: the highlighted bar will appear in the window).
+   Items can be selected either using ENTER or pressing either of the first two
+   letters of the option (meaning the lettersa at column x1+1 and x1+2).
+   Mode 2 is the same as mode 1 except items must be selected using ENTER.
+
+2) options is the number of selectable options the window has, only used by
+   mode 1 & 2.
+
+3) x1,y1 is the top left coordinate for the window.
+
+4) x2,y2 is the bottom right coordinate for the window.
+
+5) colour is the colour used to clear the window. See the COLOUR command for a
+   description of the colours.
+
+6) text is where you can put any printable characters inside the window.
+   Two commands can be within the text area, decimal 20,b sets the new colour
+   for text printed, 22,x,y sets a new printing position, its origin is at
+   x1,y1 (0,0).
+
+7) eof is used to signal the end of the window.
+   The eof (end of file) character is 26 decimal (1A hexadecimal).
+
+Typically OPEN WINDOW will only be used to open mode 0 windows.
+The MENU function should be used for mode 1 & 2 windows.
+
+The CLOSE WINDOW command closes only the most recently opened window, last in
+first out.
+
+Example.
+
+#ERRORS ON                  ;Trap any errors.
+OPEN WINDOW win_status      ;Open a typical status window.
+...                         ;Print details inside window.
+STOP
+
+win_status:
+datab 0,0,40,14,79,24,15       ;mode, options, x1,y1, x2,y2, colour
+datab 22,1,4,'System Status'   ;text...
+datab 26                       ;eof.
+
+Note ! The PRINT command does not use the current windows origin for printing,
+       the whole screen is used as always.
+     ! The maximum number of windows open is 20.
+~OUT         OUT n,b
+
+Sends the byte value b to the port n.
+FAST uses the assembler OUT command for OUTput.
+~PAGE        PAGE b
+
+Sets the current screen page, see the SCREEN command for the number of pages in
+each mode. Typically i n 80*25 colour on CGA there are 4 pages.
+
+0 is the first page.
+~PALETTE     PALETTE b
+
+Sets the colour palette for the graphics on the screen.
+At the moment this command only effects CGA SCREEN mode 4 (320*200).
+~PAPER       PAPER n
+
+Sets the paper (background) colour used by the PRINT commands.
+Sets the 'ppp' bits in the COLOUR variable.
+~PLOT        PLOT x,y
+
+Plots one dot (pixel) on the screen which must be a graphics screen.
+The graphics screen should be set with both SCREEN and MODE commands. Eg if
+using a 320*200 graphics screen then MODE should be set using
+MODE 320,AND/OR/XOR & SCREEN 4.
+
+The low bits of COLOUR are used to determine the colour of the dot on the
+screen. 2 colours use 1 bit, 4 colours use 2 bits.
+~POKE        POKE[B] address,n
+
+The word (or byte, POKEB) value is put into memory at the specified address.
+The low 8 bits of the word value n are stored at address and the high 8 bits
+are stored at address+1.
+
+PEEK is the function to retrieve values from memory.
+~POP       + POP var [,...]
+
+Pops the last pushed value from the stack.
+To use this function a good knowledge of a stack and SP registers is needed.
+~POPALL    + POPALL
+
+Pops all of the computers registers from the stack.
+
+Note ! Only to be used in conjunction with PUSHALL.
+       Registers are POPed as: DS ES DI SI BP DX CX BX AX
+~PRINT       [S][L]PRINT[H][B][HB] [DOS] n , cr lf ff "text" tab chr ;
+            [S] as in SPRINT is for ultra fast screen printing.
+            [L] as in LPRINT is for printing on the printer.
+            [H] as in PRINTH is for printing n values in HEX (hhhh).
+            [B] as in PRINTB is for printing n as byte values (ddd).
+            [HB] as in PRINTHB is for printing n as byte values in HEX (hh).
+            [DOS] as in PRINT DOS is for printing through the standard DOS IO.
+            [BIOS] as in PRINT BIOS, same as PRINT DOS (left for compatibility
+                with older versions of FAST).
+
+Just PRINT is for quick screen printing, n is printed using decimal.
+
+Print options:
+
+,   For PRINT and SPRINT to tab to the next column assuming two 16 character
+    columns.
+
+cr  Used by LPRINT and PRINT DOS to start printing from the start of the same
+    line (carriage return).
+    Used by SPRINT and PRINT to start printing from beginning of the next line.
+
+lf  Used by LPRINT and PRINT DOS to start printing from the same column but on
+    the next line down (line feed).
+
+ff  Used by LPRINT to start on a new page (form feed).
+    "text" Any message to print. To actually print the double quotes type ""
+    within the message.
+
+tab Used by PRINT, LPRINT & PRINT DOS to tab to the next 8 columns.
+
+chr Used by all to print any character eg: PRINT chr 254
+
+Note ! Comments (;) are not allowed after the print commands because ; is
+       treated as a seperator.
+~PROC        PROC[EDURE] procname [(var [,...])] statement
+PROCEDURE
+
+A procedure is the same as a FUNCTION but the RETURN value is ignored.
+See FUNCTION for a description.
+
+Note ! Both functions and procedures can be used as commands or functions.
+~PSP       + PSP n
+
+Sets the current PSP (Program Segment Prefix) to point to the segment n.
+
+The default PSP for any FAST program is the same as the code segment because
+FAST uses COM files which have only one segment.
+
+Each program run under DOS has a PSP, when running COM programs the PSP
+information is stored within the first 128 bytes of the segment.
+
+The function PSP returns the current PSP segment.
+
+The PSP command and function should be used within TSR (Terminate and Stay
+Resident programs).
+~PUSH      + PUSH n [,...]
+
+Pushes the word value onto the stack. POP retrieves the items off the stack.
+Knowledge of the STACK is essential before using this command because using it
+incorrectly will disrupt some FAST commands.
+~PUSHALL   + PUSHALL
+
+Saves all registers on the stack to be retrieved later using the POPALL command.
+
+Registers are PUSHed as: AX BX CX DX BP SI DI ES DS
+~RANDOMIZE   RANDOMIZE n
+
+Sets the RND seed (starting point) to n.
+
+If the seed is set to the same number then the same sequence of "random"
+numbers will be generated by RND.
+~READ        READ[B] v [,...]
+
+Reads a value from the current RESTORE address and puts it into the variable
+and increments the RESTORE address by 2 for words or 1 for bytes.
+
+See RESTORE for an example.
+~RECLEN      RECLEN #n,n
+
+Changes the record length of any OPEN file to a new value of n.
+This new record length is used only by SEEK.
+~REG       + REG REGISTER=n [,...]
+
+Sets any register from the following set with the value n.
+REG can be any of 'AX BX CX DX SI DI BP SP DS ES CS'
+
+Note ! Some expressions use many registers to get the value n so if n is not a
+       constant or a variable then use this syntax:
+            var_dx=PEEK segment|offset  ;or var_dx=any expression.
+            REG DI=10,DX=var_dx,AX=20
+~REMOVE      REMOVE DIR pathname
+
+Removes the specified directory, includes ERROR checking.
+~RENAME      RENAME filename TO filename
+
+Renames the first file to the second file, includes ERROR checking.
+~REPEAT      REPEAT n statement [:...]
+
+Repeats the statement n times. A GOTO within the statement can be used to exit
+the REPEAT before it finishes.
+REPEATs can be nested to about 50 levels.
+
+Example.
+
+REPEAT 200 freq+=50:REPEAT 5  NOISE 2,freq:freq+=4
+           -----------------  ---------------------
+           Repeats 200 times  Repeats 5 times * 200
+~RESET     + RESET INTERUPTS
+
+Resets the interupts INT 08 and INT 09 if they were set.
+After compiling FAST says which interupts will be used if any, those ones will
+be reset.
+
+Note ! If interupts are running while a FAST program is running then it must
+       always return to DOS when finished with either TERMINATE or STOP.
+       This applies only to INT 08 & INT 09, which may be utilised by FAST
+       automatically.
+~RESTORE     RESTORE address
+
+Sets the READ pointer to the address.
+The next READ command will retrieve data from the new address.
+
+Note ! The READ command reads words/bytes from memory whereas the READ function
+       reads bytes from a file or device.
+
+Example.
+
+PROC draw_pic(pic_address)
+RESTORE pic_address
+lx=-1
+
+loop:
+READ x,y
+IF x=-1 THEN RETURN
+IF lx>0 THEN LINE lx,ly TO x,y
+lx=x:ly=y
+GOTO loop
+~RETF      + RETF
+
+This is the same the assembly RETF instruction.
+~RETURN      RETURN [n]
+
+Return from a function optionally returning a value.
+
+Note ! If the stack has been used with PUSH or POP then it should be how it was
+       originally before the RETURN is done.
+~SAVE        SAVE filename,address,length
+
+Writes a file to disk, includes ERROR checking.
+
+Three steps are done automatically by SAVE:
+    1) CREATE filename.
+    2) WRITE length bytes from address in memory to disk.
+    3) CLOSE file.
+
+The maximum length is 65535 bytes.
+~SCREEN      SCREEN b
+
+Sets the screen display to any type, including support for HGA, MDA, CGA, EGA,
+VGA and any others which use the BIOS INT 10h for setting video modes.
+MODE should be used in conjunction with SCREEN to set graphics modes.
+
+    b    Type   Resolution   Adapter(s)     Colours      VIDEO
+    ------------------------------------------------------------
+    0     T      40 x 25     All but MDA    16 gray       B800
+    1     T      40 x 25     All but MDA  16 fore/8 back  B800
+    2     T      80 x 25     All but MDA    16 gray       B800
+    3     T      80 x 25     All but MDA  16 fore/8 back  B800
+    4     G     320 x 200    All but MDA        4         B800
+    5     G     320 x 200    All but MDA      4 gray      B800
+    6     G     640 x 200    All but MDA        2         B800
+    7     T      80 x 25     HGA,MDA,EGA       b/w        B000
+    8     G     160 x 200       PCjr           16         B000
+    9     G     320 x 200       PCjr           16         B000
+   10     G     640 x 200       PCjr            4         B000
+   11     R  (internal to EGA)
+   12     R  (internal to EGA)
+   13     G     320 x 200       EGA            16         A000
+   14     G     640 x 200       EGA            16         A000
+   15     G     640 x 350       EGA            b/w        A000
+   16     G     640 x 350       EGA            16         A000
+~SCROLL      SCROLL [DOWN] x,y,x,y,b
+
+Scrolls the specified window b lines.
+The first x,y represents the upper left corner, therefore the second x,y
+represents the bottom right.
+
+If b is 0 then the window is cleared.
+The COLOUR variable contains the value used for the blank line.
+
+Example.
+
+SCROLL 0,0,24,79,1      ;Scroll the entire screen up one line.
+~SEEK        SEEK #n,record
+
+Moves the file pointer to the nth record, includes ERROR checking.
+The offset within the file will = record * reclen.
+
+Record can be a 32 bit expression or variable.
+
+By default the record length if 1 so SEEK #1,1000 will seek to the 1000th byte.
+
+~SETINT    + SETINT b TO address
+
+The interupt vector is set to the given address.
+
+*** b is a hexadecimal number by default, see the DOS and INT commands.
+
+GETINT is a function which returns the address of an interupt vector.
+~SHAPE       SHAPE "????????????????"
+
+Defines a shape to be used by the SPRITE command.
+Sprites can be any width in multiples of 16 pixels.
+
+When defining sprites for MODE 640 or MODE 720 then each character within the
+SHAPE string represents one pixel, MODE 320 uses two characters - 4 colours.
+
+Note ! The asterisk (*) is used to represent 1, space is for 0.
+
+Example.
+
+DATAB 1,8   ;This sprite will be 1*16 pixels wide and 8 pixels high.
+SHAPE "                "
+SHAPE "  ************  "
+SHAPE "  ***      ***  "
+SHAPE "  **        **  "
+SHAPE "   ***    ***   "
+SHAPE "     ******     "
+SHAPE "       **       "
+SHAPE "                "
+~SHELL   $$$ SHELL string
+
+Performs the DOS command through the command interpreter COMMAND.COM, includes
+ERROR checking.
+~SOUND       SOUND duration,n
+
+Sets the speaker to produce a noise at frequency n. The duration of the noise
+will be for duration interupts.
+By default the computers timer interupt is activated 18.2 times per second.
+This can be changed if the time is not required.
+Setting the clock frequency with CLOCKS is allowed, but CLOCKS 0 must be used
+to reset to 18.2 interupts per second when your program finishes.
+
+The variable DURATION can be used to alter or test how many interupts remain
+before the sound finishes.
+A frequency can be converted to n using: n = 1,331,000 / freq
+
+NOISE OFF can be used to turn the sound off before DURATION=0.
+
+Note ! While the sound is being made, the program continues; INT 08 is used in
+       the background to automatically detect the end of the sound and turn
+       the speaker off.
+~SPACE       SPACE n
+
+Defines a work area of n bytes in length. n must be a constant.
+All bytes are set by default to 0.
+
+SPACE is identical to saying DATAB 0, ... n times.
+
+If defining space for a variable of say 200 bytes, it is preferable to use
+the declaration as var ? 200.
+
+Example.
+
+table: space 200    ;Puts 200 bytes in memory. Same rules apply to SPACE as
+                    ;to DATA, should be used at end of program.
+
+table ? 200         ;Can be used anywhere. Same as above but won't add 200
+                    ;bytes to the file length.
+~SPPOS     + SPPOS
+
+Sets the register SI for SPRINTing. Register SI is set equal to the variable
+LOCPOS which represents the position for the PRINT command. Register SI is
+destroyed in certain instances so SPPOS should be used just before using SPRINT.
+
+
+Example.
+
+SPPOS
+m=start_file
+WHILE PEEKB m SPRINT CHR PEEKB m;:m++
+
+There are 2 other VERY FAST printing routines for printing lines of text
+or messages: PRINTS & PRINTM (PRINTM is a function).
+
+PRINTM is the prefered choice, it prints a line, automatically scanning for
+a variety of end characters, including end of file. Tabs are automatically
+expanded and the colour can be transparent or changed.
+~SPRITE      SPRITE x,y,address
+
+Puts a sprite (bit image graphic) on the screen which must be a graphics
+screen. The graphics screen should be set with both SCREEN and MODE commands.
+Eg if using a 640*200 graphics screen then MODE should be set using
+MODE 640,AND/OR/XOR & SCREEN 6.
+
+A sprite is defined by the contents of the bytes at 'address'.
+    address + 0 = width of sprite (in words) 1=16 bits/2=32 bits etc.
+    address + 1 = heigth of sprite (in pixel rows).
+    address + 2 = shape data (width*2*height bytes).
+
+Example of a sprite 16 pixels across and 5 pixels high.
+
+SCREEN 6:MODE 640,AND
+SPRITE x,y,sprite_address
+STOP
+
+sprite_address:
+DATAB 1,5
+SHAPE "       **       "
+SHAPE "   **********   "
+SHAPE "****************"
+SHAPE "   **********   "
+SHAPE "       **       "
+~STACK     + STACK=n
+
+Sets the stack pointer (register SP) to the value n.
+Should only be used if full control of the stack is guaranteed, remembering
+that interupts use the stack (DISABLE INTERUPTS if setting the stack to point
+to a volatile memory area).
+~STOP        STOP INT b
+
+Stops interupt b from doing anything, ie: disables the current ON INT b
+statement.
+
+Note ! b ranges from 1 to 8.
+
+FASTs 8 interupts are seperate from the computers interupts (using the FAST
+INT, GETINT and SETINT commands) and different from DOS functions (using DOS).
+FASTs 8 interupts are all attached to the computers interupt 08h which is the
+normal timer tick interupt.
+~STOP        STOP DEBUG
+
+Stops the current ON DEBUG statement, ie: nothing is done during each debugged
+line at all, until the next ON DEBUG command.
+~STOP        STOP RESIDENT
+
+The program returns to DOS and remains in memory. All files that are OPEN
+are left open and all memory ALLOCATEd is left allocated.
+
+This command is for TSR (Terminate and Stay Resident) programs.
+
+The other FAST commands to use when writing TSR programs are normally
+PSP, INDOS & ON IDLE.
+
+For an example of a TSR program see the PU.F source file.
+
+Note ! All interupts set using ON INT, ON KEY, ON SCAN & ON IDLE remain in use
+       after STOP RESIDENT but interupts set using ON BREAK & ON CRITICAL are
+       restored to their original values.
+~STOP        STOP IDLE
+
+Stops the current ON IDLE statement, ie: Now every IDLE interupt does what it
+used to; typically DOS does nothing.
+~STOP        STOP TRACE
+
+Stops the current ON TRACE statement, ie: nothing is done during each traced
+line other than the ordinary, which is to display the source code being
+executed if run using FASTT.
+~STOP        STOP
+
+Same as TERMINATE.
+~STOP    $$$ STOP SCAN b
+
+~STOP    $$$ STOP CRITICAL
+~STOP    $$$ STOP KEY b
+~STRING      STRING b
+
+Defines an area in memory suitable for the INPUTS command.
+The memory is defined as:
+    address + 0 = length of string (b)
+    address + 1 = ? (set by INPUTS)
+    address + 2 to address + 2 + b is set to 0 by default.
+                  The actual text goes here.
+~SWAP        SWAP var,var
+
+The contents of one variable is swapped with the other.
+~TERMINATE   TERMINATE
+
+Same as STOP.
+Terminates (STOPs) the program, all memory is automatically freed and interupts
+08 and 10h are reset if they were used.
+
+TERMINATE is the same as: 1) RESET INTERUPTS
+                          2) INT 20h
+~TEST        TEST BREAK
+
+Checks to see if the break key has been pressed, the last ON BREAK statement is
+executed if break was pressed.
+~TIMER       TIMER=n
+
+Sets the low part of the time system variable to n.
+This effects the computers current DOS TIME setting.
+~UNSIGNED    UNSIGNED v [,...]
+
+Declares a variable of one word, 16 bits.
+All unsigned variables must be defined at the start of a program, signed takes
+preference over unsigned.
+
+Unsigned variables range from 0 to 65535.
+~VAR         VAR[32] var [,...]
+
+Declares a variable of one word (or double word - VAR32).
+Only variables used before they are assigned a value must be declared with VAR.
+
+All 32 bit variables must be declared using VAR32 because all assignment
+operators default to 16 bits (one word).
+~WAIT        WAIT FOR n
+
+n is recalculated until it gives a true (not 0) value.
+
+Examples.
+
+WAIT FOR KEYPRESSED
+WAIT FOR KEY=27
+~WHILE       WHILE n statement
+
+The statement is repeated until the expression n gives a false value, ie n=0.
+~WRITE       WRITE #n,length FROM address
+
+'Length' bytes at 'address' are written to a file, includes ERROR checking.
+~
+

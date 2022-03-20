@@ -1,0 +1,44 @@
+
+;==============================================================================
+;FAST 32 bit libraries - later to put into FASTLIB.ASM
+;==============================================================================
+
+;02/02/93   The constant p32_bios must be defined before entry to this program.
+;	    if p32_bios=0 then the 'print' command is used, otherwise: bios
+
+#short
+var32 n32,s32,div32,sp32
+var p32q,p32lead
+
+proc prt32
+    {
+    sp32=s32/div32
+    if (low sp32)=p32q then
+	{
+	#if p32_bios
+	if p32lead then print bios chr p32lead;
+	#else
+	if p32lead then print chr p32lead;
+	#endif
+	return
+	}
+    #if p32_bios
+    print bios chr '0'+low sp32;
+    #else
+    print chr '0'+low sp32;
+    #endif
+    p32q=-1
+    s32-=sp32*div32
+    }
+
+proc print32(p32lead)
+    {
+    p32q=0
+    s32=n32
+    div32=1000000000
+    for pl32=1 to 10
+	if pl32=10 then p32q=-1
+	prt32
+	div32/=10
+    next pl32
+    }

@@ -1,0 +1,82 @@
+OPERATORS
+=========
+
+You know, + - * / etc...
+~n * m       Multiple n by m.
+~n + m       Add m to n.
+~n - m       Subtract m from n.
+~n / m       Divide n by m.
+~n < m       If n less than m then return true (1) else false (0).
+
+See 'n >= m' for a description of signed and unsigned numbers.
+~n <= m      If n less than or equal to m then return true (1) else false (0).
+
+See 'n >= m' for a description of signed and unsigned numbers.
+~n <> m      If n not equal to m then return true (1) else false (0).
+~n = m       If n equals m then return true (1) else false (0).
+~n > m       If n greater than m then return true (1) else false (0).
+
+See 'n >= m' for a description of signed and unsigned numbers.
+~n >= m      If n greater than or equal to m then return true (1) else false.
+
+Note ! This test uses signed numbers (see below) unless the expression n is
+       unsigned.
+
+Unsigned numbers
+----------------
+Unsigned variable must be explicitly defined using the command UNSIGNED.
+An unsigned number is any expression using an unsigned variable in it.
+
+Signed Numbers
+--------------
+All numbers (and expressions) are signed by default, all numbers are
+represented by 16 bits.
+Bits are numbered from 15 to 0 (15th being most significant), the 15th bit
+represents the sign, 1 means negative, 0 is positive.
+Note: Negative numbers use twos complement so if the number is negative then it
+      is represented as = 0 - ABS(n)  ;ABS(n) being the absolute value of n.
+
+Examples: Binary (16 bits)   Decimal  Calculated    Unsigned
+          --------------------------------------------------
+          00000000 00000000 =      0        0             0
+          00000000 00001010 =     10       10            10
+          11111111 11111110 =     -2      0-2         65534
+          10000000 00000001 = -32767  0-32769         32769
+
+Note ! The default for expressions is signed but unsigned overrides signed.
+~n ABOVE m   If n above m then return true (1) else false (0).
+
+Note ! Using ones complement (+0 to +65535).
+~n AND m     Logically ANDs n with m, bit by bit.
+
+Example. 25 AND 7
+
+    11001b (25)         AND| 1 0
+AND 00111b  (7)         ---+----
+---------------          1 | 1 0
+ =  00001b  (1)          0 | 0 0
+~n BELOW m   If n below m then return true (1) else false (0).
+
+Note ! Using ones complement (+0 to +65535).
+~n MOD m     Gives the remainder of the n / m.
+
+Example.
+
+20 MOD 7 = 6    ;20/7=2 with 6 left.
+~n OR m      Logically ORs n with m, bit by bit.
+
+Example. 25 OR 7
+
+    11001b (25)         OR | 1 0
+OR  00111b  (7)         ---+----
+---------------          1 | 1 1
+ =  11111b (31)          0 | 1 0
+~n XOR m     Logically eXclusize ORs n with m, bit by bit.
+
+Example. 25 XOR 7
+
+    11001b (25)         XOR| 1 0
+XOR 00111b  (7)         ---+----
+---------------          1 | 0 1
+ =  11110b (30)          0 | 1 0
+~

@@ -1,0 +1,367 @@
+Fixed: EXTINPUT functions return 0 if ESC pushed (all changes are ignored).
+
+FAST: v1.98  Date: 01/03/89
+
+~Fixed: #TRACE ON/OFF was implemented and FASTT is a new program to run compiled
+       code while showing source code.
+
+FAST: v2.00  Date: 06/01/89
+
+~Fixed: SEARCH[B] produces shorter code.
+
+FAST: v2.01  Date: 09/01/89
+
+~Fixed: SEARCH[B] returned 0 for last item, now it returns proper address
+       (long time bug, not caused by v2.01).
+     - The NULL command has been added to do nothing but fill a space where a
+       command is needed but not wanted.
+
+FAST: v2.02  Date: 17/01/89
+
+~Fixed: Added #entry command to set code entry point.
+       Added modify command: modify segment to new_paragraphs.
+
+FAST: v2.03  Date: 05/02/89
+
+~Fixed: Fixes print tab and print , didn't tab 8 or 16 characters.
+
+FAST: v2.04  Date: 09/01/89
+
+~Fixed: The function carry has been added, 1=carry set else 0.
+     - Added #short and #long. All code compiled while #short is set
+       will produce short jumps in IF THEN ELSE statements. The
+       default is long. The error 'Code exceeds short jump range!'
+       will occur if the code is too long.
+
+FAST: v2.05  Date: 12/02/89
+
+~Fixed: Windows now checks for enough free memory or else 'error 8'
+
+FAST: v2.06  Date: 13/02/89
+
+~Fixed: close window - if none gives error 6 ('invalid handle').
+       open window  - if 20 windows open already then error 4
+       ('no more handles').
+
+FAST: v2.07  Date: 14/02/89
+
+~Fixed: Extended the var data type, unsigned is a subset.
+       Example... UNSIGNED address;   Effects < > >= <= only.
+
+FAST: v2.08  Date: 19/02/89
+
+~Fixed: #SHORT and #LONG automatically match correctly at the end of IF THEN
+       ELSE blocks.
+     - Add PRINTM command: printm address,len to print the memory in ascii at
+       address onto the screen at LOCPOS. The line is cleared to a length of
+       len characters. Used in WT and FASTT.
+
+FAST: v2.09  Date: 22/02/89
+
+~Fixed: Add ON TRACE/DEBUG and STOP TRACE/DEBUG.
+       on trace statement - called by FASTT.
+       on debug statement - called for every debugged line.
+
+FAST: v2.10  Date: 23/02/89
+
+~Fixed: Signed variables, now work in all cases.
+
+FAST: v2.11  Date: 27/02/89
+
+~Fixed: Unsigned variables (didn't have fixed before).
+
+FAST: v2.13  Date: 01/03/89
+
+~Fixed: Problems with FAST giving wrong error messages.
+     - Improve 32 bit arithmetic.
+
+FAST: v2.14  Date: 02/03/89
+
+~Fixed: Optimize block commands when in same segment.
+
+FAST: v2.15  Date: 03/03/89
+
+~Fixed: ERROR MSG command automatically prints 'Error n [DOS=n]' when it gets an
+       error of its own. DOS=n is the error then error msg got.
+
+FAST: v2.16  Date: 07/03/89
+
+~Fixed: PRINTM function now ignores line feeds (10).
+     - Add #SETDOS n.xx command, FAST now compiles your programs so
+       they check for the correct DOS version.
+       The default is 2.00 but if special FAST commands are used or
+       the user specifies another version then that version or higher
+       must be present to work. #SETDOS cannot be lower than what
+       FAST requires. Example... #SETDOS 3.30
+
+FAST: v2.17  Date: 09/03/89
+
+~Fixed: Add IRET and RETF commands - same as assembler.
+       Useful when writing own interupt handlers etc.
+     - Renamed SETVECT and GETVECT to SETINT and GETINT.
+
+FAST: v2.18  Date: 11/03/89
+
+~Fixed: Add STOP command - synonomous with TERMINATE.
+     - PRINT DOS is now valid, earlier documentation said PRINT DOS but only
+       PRINT BIOS was available. Now PRINT DOS is valid -
+       both print using the DOS standard io.
+     - SEEK #n,EOF  ;same as seek to end of file.
+
+FAST: v2.19  Date: 19/03/89
+
+~Fixed: PROC[EDURE] and FUNCTION are now treated the same.
+       This means a function can be used as a command and a procedure can be
+       used as a function. When either is used as a command this means the
+       RETURN value will be ignored.
+
+FAST: v2.20  Date: 27/03/89
+
+~Fixed: PRINTM address,len [,0]  adding ,0 means PRINTM does not overwrite the
+       current colour on the screen.
+     - When window commands get an error they leave the address from within the
+       code that the window command was called from rather than the library
+       address.
+       Note: OPEN WINDOW & CLOSE WINDOW[S] are libraries built invisibly into
+             the FAST compiler.
+
+FAST: v2.21   Date: 29/03/1989
+
+~Fixed: Fixed compiler setting of video adapter.
+     - ERROR MSG prints correct DOS error for all errors.
+     - Shorten code for all error handling, created two internal libraries.
+
+FAST: v2.22   Date: 30/03/1989
+
+~Fixed: HGRAPHICS command now installed.
+
+Fix the PLOT, LINE and SPRITE routines!
+
+FAST: v2.23   Date: 02/04/1989
+
+~Fixed: Error handling didn't handle properly since last change, now works ok.
+
+FAST: v2.25   Date: 12/04/1989
+
+~Fixed: PRINT "stuff" ELSE - didn't print the CR character for newline.
+     - Some of the FAST Compilers screen output.
+
+FAST: v2.26   Date: 17/04/1989
+
+~Fixed: GETINT and SETINT use hex numbers (same as DOS and INT).
+       Eg SETINT 21 TO address ;Means 21h (33 decimal).
+
+FAST: v2.27   Date: 25/04/1989
+
+~Fixed: MODE function is now called SCREEN, since corresponds to the SCREEN
+       command.
+     - The SCREEN function was changed to SCRCHR y,x.
+
+FAST: v2.29   Date: 29/04/1989
+
+~Fixed: Tidied up some FAST code and removed the FAST maintenance BEEP option,
+       this was only setup becase FAST used to be a slowish compiler.
+
+FAST: v2.30   Date: 01/05/1989
+
+~Fixed: Added the INDOSS and INDOSO functions, these are for TSR programs.
+       INDOSS returns the segment of the INDOS flag, INDOSO returns the offset.
+       If you override an interupt and test the INDOS flag within the
+       interupt it will return 0 if DOS is not being used.
+       Note: When DOS awaits a command it is in DOS but IDLE.
+     - Added ON IDLE and STOP IDLE, now you can perform tasks while DOS is idle.
+
+       ON IDLE does what the original IDLE interupt did then does the new task.
+       STOP IDLE resets the IDLE interupt to what it did before using ON IDLE.
+
+Note: The INDOSS and INDOSO functions use DOS functions so must not be used
+      within an interupt, instead at program initialsation set two variables
+      = to each function. Then within the interupt test the INDOS flag by using
+            "IF seg[off]b THEN where_using_dos"
+
+FAST: v2.31   Date: 03/05/1989
+~Fixed: Added the PSP command and function.
+       PSP n    ;Sets the current PSP to segment n.
+       var=PSP  ;Returns the current PSP segment.
+
+       Note: PSP = Program Segment Prefix.
+
+FAST: v2.32   Date: 04/05/1989
+~Fixed: All variables, arrays and long variables (eg VAR ? 200) are aligned on
+       word boundaries, this makes the programs run faster when using the
+       16 or 32 bit chips (ie 80286, 386, 486 ...).
+       This also means the long variables defined using VAR ? 200 will always
+       use the highest even number.
+
+       Example...
+            x=0
+            y ? 201
+            z=20
+
+            x is stored at 0800h
+            y is stored at 0802h        0800h + 2 bytes.
+            z is stored at 08CCh        0802h + 202 bytes (rounded up from 201)
+
+FAST: v2.33   Date: 06/05/1989
+~Fixed: Now checks the 64K limit more efficiently, only one error message occurs
+       which says exceeded the 64K limit.
+
+FAST: v2.34   Date: 08/05/1989
+~Fixed: PRINTM function now prints line feeds, only skipping over it when
+       followed by a carriage return.
+     - Most undefined constants will now compile ok but the warning 'Undefined
+       label (0 used).' will be printed. All occurrences of the label will
+       represent the constant 0.
+
+FAST: v2.35   Date: 14/05/1989
+~Fixed: Completed ON TRACE handling by the program FASTT and also ON DEBUG is
+       now compiled properly: each line calls the current ON DEBUG statement.
+
+FAST: v2.36   Date: 15/04/1989
+~Fixed: Added CHANGE DISK command, changes default drive to b (a number from 0
+       for A: to the last drive).
+     - Added CDISK function for checking which drive is the default, 0 for A:,
+       1 for B: etc...
+
+FAST: v2.37   Date: 24/05/1989
+~Fixed: Added more optimisations to the POKE command, now produces even tighter
+       code.
+     - Fixed long time bug where FAST did not recognise end of file when the
+       eof (26) character was missing.
+
+FAST: v2.38   Date: 28/05/1989
+~Fixed: Change LPRINT commands to use the BIOS interupt 17h rather then through
+       DOS, this allows quicker printing but mainly allows programs to easily
+       intercept the printer output.
+
+FAST: v2.39   Date: 29/05/1989
+~Fixed: Tiny fixups and speed improvements.
+
+FAST: v2.40   Date: 07/06/1989
+~Fixed: Added the function FINDBIN, it has the same syntax as the include file,
+       FINDBIN.F. All ocurrences of FIND_BIN should be changed to FINDBIN and
+       the #INCLUDE FINDBIN.F commands should be deleted.
+
+Note ! The FINDBIN function still sets the find_bin_put variable but no other
+       variables are used.
+
+FAST: v2.41   Date: 20/06/1989
+~Fixed: Findbin needed more improvements.
+
+FAST: v2.42   Date: 21/06/1989
+~Fixed: ON IDLE command for TSR programs was 'slightly' bugged, when some
+       programs loaded they called the wrong long interupt vector.
+
+Note ! The source file TSR.F has been included now as a skeleton for any TSR
+       program you may wish to write, PU.F uses the same design.
+
+FAST: v2.43   Date: 25/06/1989
+~Fixed: CALL, JUMP and USR can now use any address (offset, or segment|offset).
+       The segment and offset can also be any expression, not just constants.
+
+FAST: v2.44   Date: 26/06/1989
+~Fixed: The /h option has been added to the FAST and SOFA command line, for
+       help. At the moment it only contains a few command reminders.
+     - The FAST and SOFA command line can now have a semi-colon appended to the
+       filename which will suppress all prompts before compiling.
+       Example, FAST WT;  compiles WT, doesn't ask for source or symbol table
+       listing.
+
+FAST: v2.46   Date: 05/08/1989
+~Fixed: The warning message 'Unexpected end of file' has been changed to now
+       give a reason, for example, Missing NEXT or IF-THEN-ELSE not finished,
+       there are 9 such warnings now to describe unfinished programs.
+     - Reminder, FAST can accept double declarations of variables using VAR
+       or UNSIGNED, a check is made to see that a signed variable is not
+       changed to an unsigned one, this would generate an error.
+
+FAST: v2.47   Date: 06/08/1989
+~Fixed: Added FAST.CFG file, if its not found in the current directory then the
+       defaults are used. FAST /m will save it automatically after altering
+       the FAST defaults.
+
+FAST: v2.48   Date: 22/08/1989
+~Fixed: FAST /? or FAST /h is now valid.
+     - FAST and SOFA now print source listings with leading zeros and lines
+       are seperated with the filename - it has made a nicer looking list
+       file.
+     - Most of the include files have been changed to .FI files.
+     - The log file has been implemented. No command line option is used,
+       you set whether you want log files or not using 'FAST /m'
+       I think this idea of yours was great, I have often needed to know
+       when I last compiled a program and whether the compile worked or not.
+       The file is called SOFA.LOG or FAST.LOG and is always put into the
+       current disk/path.
+
+FAST: v2.49   Date: 28/08/1989
+~Fixed: There was confusion between putting commands on the same line as labels,
+       this problem is now solved: You can always put a command after a label
+       without getting an error.
+       Note: Sometimes a programmer misspelled a procedure or command name.
+       For example 'high_score:explosion'. If the procedure high_score was
+       actually high_scores then FAST may have given an error or it may have
+       compiled high_score as a label. Now it will always compile it as a
+       label (well at least it's consistent).
+
+       The best way to check for labels and procedure problems is to check
+       the symbol table every so often and look for strange label or procedure
+       names.
+
+FAST: v2.51   Date: 11/09/1989
+~Fixed: The TSR programs had a small error which could effect operation if
+       activated once using the idle interupt then again using on int.
+       All TSR's should set the internal variable IHERE = 1 when starting
+       ON IDLE and reset when finished, alternatively set the IHERE variable
+       when executing the "program" procedure and when exiting it.
+
+     ! Communications commands have been installed, they are different from
+       the original design plans.
+       For full details, search for "serial" and/or "communications".
+
+FAST: v2.52   Date: 20/09/1989
+~Fixed: STOP IDLE had a bug, reset interupt all wrong. Works now though.
+
+     - Still working on serial coms commands, nobody on the Wellington BBS's
+       has any info as yet. I've got info on XMODEM and YMODEM so these
+       functions will be provided in a my terminal emulator: PHONE.F
+
+FAST: v2.54   Date: 26/09/1989
+~Fixed: The HGRAPHICS command was ignored before, it should work now.
+
+     - A new command, #PROTECT can be added anywhere in a program so that when
+       run it will check itself for viruses attached to the .COM file.
+       #PROTECT should discover any virus. If you get the message about the
+       change in a files size then you will have to eradicate the virus.
+       This can be done by first booting off a clean floppy, then recompiling
+       all FAST programs. All your other .COM, .EXE and boot sectors etc will
+       need thorough checking to avoid recurring problems.
+
+     - The pipe (|) symbol used for segment:offset notation can now be
+       optionally changed to the exclamation mark (!).
+       This option is provided so that users of Gestetner laser printers
+       can now print their source files without hassles.
+       Use FAST /m and push ! when asked 'Segment:Offset |/!', globally
+       replace | with ! using WT.
+
+FAST: v2.55   Date: 11/10/1989
+~Fixed: Serial communications are now working properly, even if limited.
+       See SERIAL_SEND, ENABLE SERIAL, DISABLE SERIAL and SERIAL_STATUS
+
+FAST: v2.56   Date: 22/10/1989
+~Fixed: Speed. Somebody alerted me that Borland's new Turbo C was faster when
+       doing the sieve benchmark - this problem has now been fixed.
+
+       PS: FAST produced a runable file 32 times less the size of C's.
+
+FAST: v2.57   Date: 18/11/1989
+~Fixed: Fixed error message when the quote character was missing from the
+       PRINT command.
+
+FAST: v2.58   Date: 26/11/1989
+~Fixed: The MOD function gave the wrong answer when the divsor was not a
+       numeric constant or a variable.
+     - Undefined procedures now produce an error, only Syntax error but at
+       least it's something.
+
+FAST: v2.59   Date: 22/03/1990
+~

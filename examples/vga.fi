@@ -1,0 +1,66 @@
+
+;==============================================================================
+; vga graphics routines
+;==============================================================================
+
+;vscreen			- set screen to VGA 320*200 256 colour
+;vplot(x,y,c)			- plot x,y colour c
+;vpoint(x,y)			- returns colour at x,y
+;vsprite(x,y,mem)		- display sprite in memory (width,rows,data)
+;palette(reg,blue,green,red)	- set colour register
+
+;notes
+;all variables are prefixed with "vga_"
+
+const cblack=0
+const cdot=15
+
+function vscreen
+    {
+    reg ax=0013h    ;set video mode
+    int 10h
+    vga_buffer=0a000h
+    }
+
+function vplot(vga_x,vga_y,vga_c)
+    {
+    vga_m=vga_y*320+vga_x
+    vga_buffer[vga_m]b=vga_c
+    }
+
+function vpoint(vga_x,vga_y)
+    {
+    return vga_buffer[vga_y*320+vga_x]b
+    }
+
+proc vsprite(vga_x,vga_y,vga_s)
+    {
+    vga_m=vga_y*320+vga_x
+    vga_sw=peekb vga_s
+    vga_sr=peekb (vga_s+1)
+    vga_s+=2
+
+    if (vga_x+vga_sw)>320 then vga_sm=320-vga_x
+    else vga_sm=vga_sw
+    if (vga_sm<1) or (vga_sm>64) then beep:return
+
+    if (vga_y+vga_sr)>=200 then vga_sr=200-vga_y
+    if (vga_sr<1) or (vga_sr>200) then beep:return
+
+    repeat vga_sr
+	{
+	moveb vga_sm from vga_s to vga_buffer|vga_m
+	vga_s+=vga_sw
+	vga_m+=320
+	}
+    }
+
+proc ppalette(vga_reg,vga_blue,vga_green,vga_red)
+    {
+    reg cx=vga_green*256+vga_blue
+    reg dx=vga_red*256
+    reg bx=vga_reg
+    reg ax=1010h
+    int 10h
+    }
+

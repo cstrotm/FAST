@@ -1,0 +1,36 @@
+Fixed: PUSH/POP segment:exp compiles without an error.
+
+SOFA: v1.60   Date: 03/01/1989
+~Fixed: OFFSET label doesn't need the brackets around the label,
+       eg OFFSET label is ok without the brackets.
+
+SOFA: v1.61   Date: 08/01/1989
+~Fixed: Added #ORG n command to change code origin say from 100h to 0.
+
+SOFA: v1.62   Date: 05/02/1989
+~Fixed: PUSH/POP to work with 'complex' opcodes when using ',' as a seperator.
+
+SOFA: v1.63   Date: 11/03/1989
+~Fixed: Tidied up some SOFA code and removed the SOFA maintenance BEEP option,
+       this was only setup becase SOFA used to be a slowish compiler.
+
+SOFA: v1.64   Date: 01/05/1989
+~Fixed: Tiny fixups, speeded up compiler when handling registers.
+
+SOFA: v1.65   Date: 07/06/1989
+~Fixed: The message 'Warning! Undefined labels (0 used).' is now printed even
+       when the warnings option has been turned off.
+       This could have meant errors went undetected or programs behaved
+       [even more] strangely.
+
+SOFA: v1.66   Date: 20/06/1989
+~Fixed: Added SOFA.CFG file, if its not found in the current directory then the
+       defaults are used. SOFA /m will save it automatically after altering
+       the SOFA defaults.
+
+SOFA: v1.68   Date: 22/08/1989
+~Fixed: See FAST fix for same date, all changes are relevant to SOFA for this
+       version.
+
+SOFA: v1.69   Date: 28/08/1989
+~

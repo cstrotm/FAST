@@ -1,0 +1,143 @@
+
+;==============================================================================
+;		    Fast: XMS Extended Memory Include
+;		    (c) Peter Campbell Software 1993.
+;==============================================================================
+
+;functions
+;---------
+;xms_init	    - initialises XMS, returns 0 if not available
+;xms_query	    - returns largest available free block less 64K
+;xms_allocate(s)    - allocates s kilobytes
+;xms_deallocate     - deallocates block (free memory)
+;xms_get()	    - gets a block of memory from XMS memory
+;xms_put()	    - puts a block of memory to XMS memory
+
+;xms_move()	    - move xms memory within the XMS segment
+
+;12/01/93 Created XMS.FI and XMSTEST.F
+;13/09/93 Bug if XMS exists but 0K free
+;20/06/94 Include xms_move function (optional).
+;	  Must define "const xms_move_function=1" (or 0)
+
+
+#short
+
+var32 xms_offset
+
+function xms_init		    ;multiplexer: check if driver available
+    {
+    ;get multiplexer interupt address and store for call instruction.
+    reg ax=4300h:int 2fh
+    if (low reg ax)<>80h then return 0
+    reg ax=4310h:int 2fh
+    poke mseg,reg es
+    poke moff,reg bx
+    return 1
+
+    emms:
+    emms_bytes:     data 1024,0
+    emms_shandle:   data 0
+    emms_soffset:   data 0,0
+    emms_dhandle:   data 0
+    emms_doffset:   data 0,0
+    }
+
+function xms(ax)
+    {
+    funct=ax
+    reg ax=ax
+    inline 9ah		    ;CALL FAR SEGMENT:OFFSET
+    moff: data 0
+    mseg: data 0
+    ax=reg ax
+    bx=reg bx
+    if ax=0 then	;0=error, unless query function
+	{
+	if funct=0800h then return 0
+	error low bx
+	}
+    }
+
+function xms_query	;query free space
+    {
+    xms(0800h)
+    if ax>64 then ax-=64 else ax=0
+    return ax		;keep space for HMA table (64K)
+    }
+
+function xms_allocate(xmss) ;allocate block
+    {
+    reg dx=xmss
+    xms(0900h)
+    xms_handle=reg dx
+    return 1
+    }
+
+function xms_deallocate 	;free allocated block
+    {
+    reg dx=xms_handle
+    xms(0a00h)
+    return 1
+    }
+
+function xms_get(xms_size,xms_seg,xms_off,xms_point)
+    {
+    if xms_size and 1 then xms_size++	;force even number
+    xms_offset=peek xms_point
+
+    poke emms_shandle,xms_handle
+    poke emms_bytes,xms_size
+    poke emms_soffset,low xms_offset
+    poke emms_soffset+2,high xms_offset
+    poke emms_dhandle,0 	      ;RAM
+    poke emms_doffset,xms_off
+    poke emms_doffset+2,xms_seg
+    reg si=emms
+    xms(0b00h)
+    }
+
+function xms_put(xms_size,xms_seg,xms_off,xms_point)
+    {
+    if xms_size and 1 then xms_size++	;force even number
+    xms_offset=peek xms_point
+
+    poke emms_shandle,0 	      ;RAM
+    poke emms_bytes,xms_size
+    poke emms_soffset,xms_off
+    poke emms_soffset+2,xms_seg
+    poke emms_dhandle,xms_handle
+    poke emms_doffset,low xms_offset
+    poke emms_doffset+2,high xms_offset
+    reg si=emms
+    xms(0b00h)
+    }
+
+#if xms_move_function
+
+var32 xms_offset2,xms_size2
+
+function xms_move(xms_size,xms_point,xms_point2)
+    {
+    xms_size2=peek xms_size
+    if (low xms_size2) and 1 then xms_size2++	;force even number
+
+    xms_offset=peek xms_point
+    xms_offset2=peek xms_point2
+
+    poke emms_shandle,xms_handle
+    poke emms_bytes,low xms_size2
+    poke emms_bytes+2,high xms_size2
+    poke emms_soffset,low xms_offset
+    poke emms_soffset+2,high xms_offset
+    poke emms_dhandle,xms_handle
+    poke emms_doffset,low xms_offset2
+    poke emms_doffset+2,high xms_offset2
+    reg si=emms
+    xms(0b00h)
+
+    poke emms_bytes+2,0     ;reset length high
+    }
+
+#endif
+

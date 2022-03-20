@@ -1,0 +1,142 @@
+
+;=============================================================================
+;		  TEST.MSG - extended input program.
+;=============================================================================
+
+;length=EXT_INPUT(string)
+;length=EXT_CLEAN_INPUT(string)
+;length=EXT_STRING(space,len)
+;length=EXT_CLEAN_STRING(space,len)
+
+;NB. length=0 when esc is pushed.
+;NB. length includes carriage return character
+;NB. locpos=screen position for input
+
+
+;LOCPOS = input position.
+#short
+var eim,ext_max
+store_eim ? 128
+ext_inpend=13
+
+proc ext_clear_line fillb ext_max from eim with ' ':ext_tx=0
+
+function last_place
+    {
+    ex=0:m=eim
+    while m below (eim+ext_max-2)
+	{
+	if peekb m<>' ' then ex=m-eim+1
+	m++
+	}
+    return ex
+    }
+
+function ext_input(eim)
+{
+ext_max=peekb eim
+eim+=2
+eis=1
+
+ext_entry2:
+ext_esc=0
+moveb ext_max from eim to store_eim
+
+filling=0:ein=eim
+repeat ext_max
+    {
+    if (peekb ein=13) or (peekb ein=0) or (peekb ein=ext_inpend) then filling=1
+    if filling then pokeb ein,' '
+    ein++
+    }
+
+ext_tx=0:ext_insert=0
+ext_yy=locpos/fscreen_cols2
+ext_xx=(locpos mod fscreen_cols2)/2
+loop:
+locate ext_yy,ext_xx
+m=eim:repeat ext_max print chr peek m;:m++
+
+cursor ext_yy,(ext_tx+ext_xx)
+if mono
+    then cursor size 12-(ext_insert*5),13
+    else cursor size 6-(ext_insert*3),7
+
+wait for keypressed
+ext_ks=keyscan:ext_kk=low ext_ks
+
+if ext_kk=13 then goto endeim
+if ext_kk=27 then ext_esc=1:goto endeim
+
+if ext_ks=18176 then ext_tx=0
+if ext_ks=20224 then ext_tx=last_place
+if (ext_ks=19200) and (ext_tx>0) then ext_tx--
+if (ext_ks=19712) and (ext_tx<(ext_max-1)) then ext_tx++
+if ext_ks=21248 then
+    {
+    ext_dl=ext_max-ext_tx-1
+    if ext_dl>0 then
+	{
+	pokeb eim+ext_max-1,' '
+	moveb ext_dl from eim+ext_tx+1 to eim+ext_tx
+	}
+    }
+if (ext_ks=29952) or (ext_ks=16384) then
+    {
+    fillb ext_max-ext_tx from eim+ext_tx with ' '
+    }
+if ext_ks=20992 then ext_insert=not ext_insert
+if ext_ks=16128 then ext_clear_line
+if ext_ks=3592 then
+    {
+    if ext_tx then
+	{
+	pokeb eim+ext_max-1,' '
+	moveb ext_max-ext_tx from eim+ext_tx to eim-1+ext_tx
+	ext_tx--
+	}
+    goto loop
+    }
+
+if not ext_kk then goto loop
+if ext_tx<(ext_max-1) then
+    {
+    if ext_insert then moveb ext_max-ext_tx from eim+ext_tx to eim+1+ext_tx
+    pokeb eim+ext_tx,ext_kk
+    ext_tx++
+    }
+goto loop
+
+endeim:
+if ext_esc then 
+    {
+    moveb ext_max from store_eim to eim
+    return 0
+    }
+lp=last_place+1
+if peekb (eim+lp-1)<>' ' then lp++
+if eis then pokeb eim-1,lp-1
+pokeb eim+lp-1,ext_inpend
+return lp
+}
+
+function ext_clean_input(eim)
+    {
+    ext_max=peekb eim
+    fillb ext_max from eim+2 with ' '
+    return ext_input(eim)
+    }
+
+function ext_string(eim,ext_max)
+    {
+    ext_entry3:
+    eis=0
+    goto ext_entry2
+    }
+
+function ext_clean_string(eim,ext_max)
+    {
+    fillb ext_max from eim with ' '
+    goto ext_entry3
+    }
+

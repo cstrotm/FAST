@@ -1,0 +1,326 @@
+CLIST is a program to print FAST source files using two columns.
+
+CLIST prints using compressed text 17 cpi & 1/8" line spacing. The settings can be changed in the CLIST.F file then recompiled.
+
+CLIST can be used for making hard copies of files when paper is in short supply or just to get more code on a page for easier manual debugging.
+
+CMP Compares two files by displaying any differences between the two files at all locations.
+
+Each differnce is displayed as 'ADDR : B1 ! B2'.
+
+All values are in hex. The address starts at 0. A file in excess of 64k is ignored.
+
+ESC aborts while running. SPACE can be used to suspend the listing.
+
+COMPF compresses and uncompresses both FAST and ASM files.
+
+Firstly run COMPF.
+
+When asked for a file enter
+
+    1) *.F to compress all FAST source files.
+    2) *.ASM to compress all ASM source files.
+
+    3) *.FX to uncompress all FAST source files.
+    4) *.AX to uncompress all ASM source files.
+
+Note! The file created (with the compressed data) is called _.FX or _.AX.
+
+To compress a single file use its filename, eg WT.F; this will create a file called WT.FX. Therefore to uncompress it use WT.FX as the file name.
+
+COMPF was written because I currently have no file compression utility, most would work better than COMPF, for added compression try compressing the .FX
+(or .AX) files before say sending them by modem or putting them onto a 360k
+disk.
+
+CR counts the number of lines in any group of files (by counting carriage returns).
+
+After entering CR you will be asked for the file(s), for multiple files use wild card characters, eg '*' & '?'.
+
+D is an another directory command, 3 columns are displayed, sorted by name.
+
+Examples:   () - means that part is implied eg d (*.*). Type D to get DIR *.*
+
+            d (*.*)        ;Displays all files and directories.
+            d \asm\(*.*)   ;Displays all files in the sub-directory \asm.
+            d a:*.doc      ;Displays all DOC files on drive A.
+            d F(*.*)       ;Displays all files starting with F.
+
+
+Press any key to suspend the directory - it scrolls fairly fast, escape to abort.
+
+DC is the start of my own DOS DEBUG substitute.
+
+This was written as a complimentary program for SOFA and FAST. However I started using FAST more so needed a debugger specifically for FAST. Hence the source debug/trace program: FASTT (also written in FAST - of course).
+
+DC offers a quick way to unassemble machine code - also producing sort of labels. If anybody would like to see DC complete then encourage me, for a worthy fee I would complete it to your specifications and give you completed source code.
+
+DSCR dumps the screen image to a disk file when activated using PrtSc.
+
+EDIT is another way to type commands into the computer, with the following features:
+
+	 - Access to the last 16 commands is available through a window.
+     - Easier editing with more commands.
+
+Keys:  F1, F3, arrows, ESC & INS/DEL act as they do in DOS.
+
+     The UP and DOWN arrows bring up the window with the last 16
+    	commands, press ESC to return to the command line or ENTER to 		 select the command to modify before using. Pressing the first 	 letter of the command line in the window moves the highlight 		 bar to the next matching entry.
+
+     CTRL-END & F6 clear to end of line.
+
+
+EDIT only works in 80 column text mode on CGA and HGA/MDA cards.
+
+Some extra functions are provided so when the computer goes into graphics mode you can still continue:
+
+    ALT-X quits edit and frees up memory used (if no other TSRs loaded since
+        EDIT). Command line entry is resumed using the standard DOS routine
+        which works in graphics modes.
+    ALT-C clears the screen and resets the computer back to text mode.
+
+FASTT is the fast utility to trace source files line by line.
+
+To run FASTT firstly compile your program with the #TRACE ON and #TRACE OFF options set in the correct places. FAST says a program can be traced by telling you that an FT file was created.
+
+Type 'FASTT file', all the source files that will be used are checked to make sure they exist in the default directory, it not an error will occur.
+
+When tracing a program the full screen is used, pressing any key advances to the next line.
+
+Notes ! A traced program can abort using BREAK but using the current version of FASTT it will typically crash.
+! FASTT uses 1 file handle for each source file that is actually traced, this may limit FASTT use.
+! FASTT only works properly in the 80 column colour text mode.
+! When the Scroll-Lock light is on then the programs runs faster without showing any details on screen, this can be used to optional turn tracing off until a certain condition applies.
+
+FFIND is similar to the DOS 'find' command, it is designed for global searches.
+
+Example: FFIND  ды
+         Which files? *.f  ды
+         Look for? high_score  ды
+
+FFIND displays the file it is looking through and when a match is found it lists it on the screen.
+
+The wild card ? can be used to mean anything. Any part of a file longer than 64k is ignored. FFIND is case sensitive (case must match exactly). Pressing CTRL-SCROLL LOCK (break) will abort the find before finished.
+
+To send FFIND output to a disk or printer then use the standard DOS pipe/redirection commands. Print using >prn, or disk using >filename
+
+FREE displays the number of Kilobytes free for DOS at anytime.
+
+FSET is the setup utility for FAST, SOFA and FFD.
+
+It is provided so you can use it in your own programs. FSET is user friendly and designed specifically to make the user trustworthy of the product he or she is about to install - very important!
+
+FSET.F contains tables at the end which define the installation for any number of different programs or files.
+
+GAME is a small shoot-em up (try it - see what happens).
+
+Playing keys: A     - UP
+              Z     - DOWN
+              ENTER - FIRE
+              ESC   - EXIT
+
+Must have a CGA card (or CGA emulator if HGA).
+
+If the game is too fast then change it so that there are more background dots or puts delays into the source file, then recompile it.
+Eg: Line 4, change const backdots=9 to another value.
+
+HEXD is a TSR program that has 4 basic utilities, it may have various preferences over other TSRs because it uses very little memory (10k).
+
+  1) Ascii table with all 256 characters shown at once. To find the number of a character move the cursor using the numeric keypad (diagonal also). The character number is shown in hex and decimal at the bottom.
+
+  2) The number conversion allows entry of a hex or decimal number which is then displayed in DECIMAL  HEX  BINARY across the window. Press H to enter a hex number or D to enter decimal. Press PgUp or PgDn to change the numbers.
+
+  3) Keyboard codes - Press the key to see its KEY code, SCAN code and shift byte values. KEY is the ascii value of the key. SCAN is the keyboard return code for the key - includes arrows and function keys. KEYSCAN = SCAN * 256 + KEY. Pushing ESC returns to the main menu - its KEY = 27, SCAN = 1.
+
+  4) Colours - shows the colour and its hex value. To read the colours HEX value - take the first hex digit from the righthand side down, the second digit from the row across the top.
+
+To disable HEXD from working press D on the main menu.
+
+Avoid activating HEXD in the middle of a disk operation or while certain application programs are initialising thenselves - sometimes hangs system.
+
+Activate using both left and right shift keys together.
+
+To select an option from the menu either move bar with up/down or press thefirst letter of the option to activate immediately.
+
+MAKEMSG creates/modifies .ERR files (such as the \DOS.ERR file).
+
+** MERR is a new program for creating .ERR files.
+
+To create/modify messages, just enter its number - then type the message in. To print all messages, type 'p' instead of a number.
+
+To save the changes made, press ENTER or ESC to exit (MAKEMSG asks if you want to save the changes).
+
+Type MAKEMSG ды to start, then \DOS.ERR to create/modify messages within the file. Any .ERR file created by MAKEMSG or MERR can be modified.
+
+MERR does the same as MAKEMSG but uses windows and scroll bar selection for easier use.
+
+See MAKEMSG for a description.
+
+MISsile is a 1 or 2 player game. Each player (or computer) must try to destroy the enemy base by firing a missile at the opponent.
+The game is played where both players move simultaneously.
+
+Keys:       Function.        Player ONE   Player TWO
+            ----------------------------------------------------
+            Decrease angle       F1           7 (numeric keypad)
+            Increase angle       F2           9 (numeric keypad)
+            Decrease force       F3           1 (numeric keypad)
+            Increase force       F4           3 (numeric keypad)
+            Fire                 ~            2 (numeric keypad)
+
+            Quit = ESC
+
+Notes: A missile will blow up if it hits ANYTHING. The clouds give an indication as to the winds speed and direction. Each player scores 500 points for destroying the enemy base. A base will blow up if a) it has been hit sufficiently by missiles, b) falling shrapnel has destroyed it.
+
+OTHELLO is the board game (also called Reversi).
+
+You can play either computer or human.
+
+Warning! This program was written along time ago, I have not modified it to keep up with FASTs improvements.
+
+         The computer adapts a 'different' yet flawed technique for its choice in strategies.
+
+PC displays all SELECTED files on the screen SORTED by FILENAME.EXT.
+
+The user then selects a file by positioning the cursor over the filename and pressing ENTER (or P for printout).
+
+A file called PC.FIL must be in the root directory of the current drive, if it doesn't exist then the default *.DOC is used. If PC.FIL does exist then it must contain filenames using wildcard characters (Only files in the current directory can be displayed). PC.FIL can be created using any ASCII text editor.
+
+Example PC.FIL: *.F
+                *.LST
+                *.DOC    (three seperate lines in the file.)
+
+When a file is displayed any of HOME, END, UP, DOWN, PGDN & PGUP can be used to move around the file.
+
+If the line length is greater than 160 characters then the UP/PGUP will sometimes 'jump' the display.
+
+PC will handle a maximum of 1024 files.
+
+A wordstar option is provided, press W to toggle when in display mode.
+
+PCSOFT is a One Fingered Typist utility program.
+
+"This program is supplied to registered users only."
+
+Add "PCSOFT" to your autoexec.bat file to make PCSOFT active all the time. With PCSOFT you push the shift key (shift, alt or control) and then push the other key. More than one shift key can be pushed, for example CTRL then ALT followed by DEL would do a system reset.
+
+PCSOFT does not effect the current keyboard use in most cases, a multi-finger typist would not notice it.
+
+This program was designed for use by people with an interest or need for computers but are restricted to pushing one key with whatever possible means.
+Secondary use: One hand using a mouse then second can still do everything.
+
+PHONE is a terminal emulator and file transfer program for use with calling of BBS's or other data services.
+
+"This program is supplied to registered users only."
+
+Help is provided seperately with this program. PHONE.DOC
+The configuration file is PHONE.CFG, a default configuration is also provided.
+
+
+PSCR overrides the normal Shift-PrtSc function.
+
+Adds 3 features to Shift-PrtSc.
+
+1) Allows selection of any part of the screen when in 80 column colour text mode (the default for almost every application).
+         Keys: Move top-left corner with shifted-arrows.
+               Move bottom-right corner with arrows.
+               Press ENTER to print highlighted area.
+               ESC to abort screen dump.
+
+2) If using 320*200 colour screen then it will be printed with a little shading.
+
+
+   Your printer must have the 640 dots per page graphics setting.
+   SDUMP is currently setup for a Panasonic KX-P1082.
+   All colours will be shaded using a 2*2 grid for the 4 colours.
+
+3) If using the 640*200 graphics screen then it will be printed.
+   Your printer must have the 640 dots per page graphics setting.
+   SDUMP is currently setup for a Panasonic KX-P1082.
+
+Note: If the printer is in any other mode then the default print screen is used.
+
+
+
+PU (Printer Utilities) is a comprehensive TSR program to set the printer options from the keyboard. TSR=Terminate and Stay Resident.
+
+PU has 21 built in and 21 user definable printer options.
+
+PU has basic features from the main menu, Line Feed, Form Feed, Reset and printing test messages to help setting up the printer.
+
+The menu works with one-touch operation - press the first letter of the option to activate it.
+
+Note: When Keeping the options (save) a copy of PU.CFG will be saved in the CURRENT disk/directory.
+
+RKEY is a key redefinition program, similar to the old NEWKEY PD program.
+
+RKEY is due for many modifications, at the moment it provides a very quick way of storing simple key macros (1 level deep).
+
+Its main use for me has been while editing source files to quickly use the learn and playback option to do repetitive tasks.
+
+SED (Sector EDitor) allows access to all sectors on a hard disk, ignoring the partition limits.
+
+SED can view a maximum of 64 sectors, 15 heads & 1024 tracks.
+
+All menu options have their letter inverted on the screen.
+Options:                              Range:
+    1   - Alter max tracks            0 - 1023
+    2   - Alter max heads             0 - 15
+    3   - Alter max sectors           0 - 63
+    T   - Set current track           0 - max tracks-1
+    H   - Set current head            0 - max heads-1
+    S   - Set current sector          1 - max sectors
+    ESC - Abort SED
+    A   - Change to ASCII display
+    X   - Change to HEX display
+    F   - Find a string from current sector to end of disk
+    O   - Open disk output file
+    W   - Write displayed sector to disk file
+    C   - Close disk output file
+
+Other keys:
+    Arrows - move cursor (current version has no use)
+    PgUp   - Back one sector
+    PgDn   - Advance one sector
+
+When using the ascii display there are two sides, the left displays the actual bytes - using the IBM character set. The righthand side shows the bytes in filtered form (bit 7 is ignored, if less than 32 then prints a dot '.'). To print the screen using the PrtSc button then load PSCR prior to printing so the right hand side of the screen (when in ASCII display mode) can be printed, printing the actual IBM characters will cause the printer to process them as control codes.
+
+If the program gets a disk error then you will have the options
+to either S - Try next sector or H - Try next head.
+
+SHOOT is a one or two player game, generally a fast shoot-em up.
+
+The object is to kill your oponent by shooting the're space ship.
+
+Each player is limited to 50 shots, when both players run out of ammo each player is re-stocked with another 50 shots and so on.
+
+Scoring:
+    For shooting your oponent you get 200 points.
+    For shooting a person or car then you get 2 or 5 points.
+    For shooting trees, walls and rocks no points are scored.
+
+The game ends when a player has killed his/her oponent 10 times.
+
+Player 1 uses  F2, F4 & ~                        (up, down and fire)
+Player 2 uses  4,  1  & + on the numeric keypad  (up, down and fire)
+
+Type SHOOT C ды to play against the computer.
+Type SHOOT ды   for two human players.
+
+SIEVE is the 'standard' benchmark. This version in FAST compares favourably with all other versions I've seen, especially in size and speed (what else!).
+
+TSR is a Terminate and Stay Resident skeleton program for use in writing TSR programs.
+
+The smallest TSR program is just over 700 bytes long, this is the smallest overhead set by any language I know of (except Assembly).
+
+WT is a text editor designed mainly for programming.
+
+WT offers many features and is very fast, currently there are still some errors but nothing too drastic, I use it to do ALL my editing, even changing itself.
+
+WT in brief:
+
+a) WT can have a different configuration in each directory so you have a different tab value, default file extension and backup settings.
+b) Up to 16 files can be edited at once.
+c) Search/Replace is almost instant/Quick.
+d) Full line and column blocks can be easily defined. The most recently defined block is saved as the \WT.INS file, push Shift-Insert to insert the current block.
+e) Most people like 1 editor and stick with it, no one ever makes a compromise when it comes to their editor. WT can be modified by you or (for a small fee) I can do personal customisations.
+f) *NEW* WT now keeps a WT.LOG file with the file, date & time for each file which is edited. Now a record of all work with WT, SOFA & FAST will automatically be kept in their respective log files.
+

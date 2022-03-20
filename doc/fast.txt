@@ -1,0 +1,87 @@
+This file is part of FAST (Fast PC Compiler).
+
+FAST is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+FAST is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with FAST.  If not, see <http://www.gnu.org/licenses/>.
+
+FAST - Fast PC Compiler
+=======================
+
+(c) Peter Campbell Software 1988-1994
+
+
+Introduction
+------------
+
+Fast was written about 1986-1988 using assembly language.
+Fast is loosely based on Basic, Pascal, C and Assembler.
+
+The programs produced by Fast are very small and very fast.
+
+Over the past 6 years many enhancements have been made (in the form of
+increased speed, new commands and functions, more include files etc).
+
+A new version should be available by mid-1995 which incorporates full
+32 bit support, fast graphics and memory management + plus increased
+optimisation for speed and program size.
+
+
+Getting Started
+---------------
+
+The easiest way to get started with Fast is to compile some of the 80+
+example programs, run them then edit/view the source code.
+
+Some of the main programs include:
+
+DEMO.F is a simple demonstration program.
+EDIT.F is a dos command line editor with popup window of last DOS commands.
+FASTCHK.F is a disk/operating system check program.
+FBMENU.F is a menu program, uses approx 10K memory.
+FBSHOW.F is a file viewer (25*80, 50*80 and 60*132 characters).
+LAND.F is an example game using the sprite library.
+MIS.F is a simple tank missile game.
+PCSOFT.F is a one finger type program, press one key at a time: alt/ctrl etc.
+PU.F is a tsr popup for selecting printer functions.
+PHONE.F is a terminal emulator with support for file transfer.
+SPRITE.F is a sprite editor.
+STICK.F is a communications package - connects to STICKR.
+STICKR.F is the resident communications package - like carbon copy.
+QSORT.F is a qsort program to sort large files.
+WT.F is a multi-file editor with colour and many editing functions.
+
+Aswell as Fast's extended commands and functions several include files
+are here to increase the functionality:
+
+    CMD_LINE	    - command line functions
+    COLOUR	    - colour selection
+    DATE24	    - 24 hour date fixer
+    DISKC	    - disk caching
+    EXTINPUT	    - extended keyboard input
+    FAST32	    - 32 bit print routines
+    FHELP	    - fast help files
+    FINDBIN	    - binary searching
+    FSORT	    - small file sorting
+    KEYS	    - key routines for games
+    MOUSE	    - mouse support (graphics and text)
+    QSORT	    - quick sort for large files
+    SAVER	    - screen saver
+    SAVER2	    - screen saver (strange sentences)
+    SAVER3	    - screen saver (strange sentences, rude)
+    SPRITE	    - sprite routines
+    STICK	    - stick communications library
+    VGA 	    - vga routines (320*200 256 colours)
+    XMS 	    - xms memory functions
+
+You should find many of the example programs included very useful in their
+own right - aswell as providing examples of how the Fast language is used.
+

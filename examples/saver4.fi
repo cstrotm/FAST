@@ -1,0 +1,118 @@
+
+;==============================================================================
+; screen saver -
+;==============================================================================
+
+;this file can be included in any program: #include saver.fi
+;
+;procedure saver_setup	 - initialises the screen saver
+;procedure saver_display - starts the screen saver, returns when key pressed
+
+saver_buffer ? 4000
+saver_line   ? 160
+
+proc saver_setup
+    {
+    }
+
+;==============================================================================
+
+proc saver_up
+    {
+    saver_count++
+    if saver_count and 1 then
+	{
+	move 80 from video|0 to saver_line
+	move 1920 from video|160 to video|0
+	move 80 from saver_line to video|3840
+	}
+    }
+
+proc saver_down
+    {
+    saver_count++
+    if saver_count and 1 then
+	{
+	move 80 from video|3840 to saver_line
+	move 1920 from video|0 to video|160
+	move 80 from saver_line to video|0
+	}
+    }
+
+proc saver_left
+    {
+    m=0
+    repeat 25
+	{
+	saver_m=video[m]
+	move 79 from video|m+2 to video|m
+	video[m+158]=saver_m
+	m+=160
+	}
+    }
+
+proc saver_right
+    {
+    m=0
+    repeat 25
+	{
+	saver_m=video[m+158]
+	move 79 from video|m to video|m+2
+	video[m]=saver_m
+	m+=160
+	}
+    }
+
+;==============================================================================
+
+proc saver_display(saver_mode)	    ;1=screen, 0=quotes
+    {
+    move 2000 from video|0 to saver_buffer
+    saver_mode=0
+    saver_timer=0
+
+    forever
+	{
+	if keyscan then
+	    {
+	    move 2000 from saver_buffer to video|0
+	    return
+	    }
+
+	if saver_mode=1 then saver_up
+	else if saver_mode=2 then saver_down
+	else if saver_mode=3 then saver_left
+	else if saver_mode=4 then saver_right
+
+	if saver_timer then saver_timer--
+
+	if saver_timer=0 then
+	    {
+	    saver_mode=1+(rnd and 3)
+	    saver_timer=20+(rnd and 63)
+
+	    saver_x1=2+(rnd mod 76)
+	    saver_x2=saver_x1+2+(rnd mod 12)
+	    if saver_x2>77 then saver_x2=77
+
+	    saver_y1=1+(rnd mod 23)
+	    saver_y2=saver_y1+1+(rnd mod 6)
+	    if saver_y2>23 then saver_y2=23
+
+	    colour 0
+	    scroll saver_x1,saver_y1,saver_x2,saver_y2,0
+	    }
+
+	locate 12,34
+	move 12 from video|locpos to saver_line
+	colour 128+112
+	print "SCREEN SAVER";
+
+	x=peek 0040h|006ch
+	while x=peek 0040h|006ch { }	;see on int 1
+
+	locate 12,34
+	move 12 from saver_line to video|locpos
+	}
+    }
+

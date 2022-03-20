@@ -1,0 +1,319 @@
+
+;==============================================================================
+; screen saver - displays weird messages
+;==============================================================================
+
+;this file can be included in any program: #include saver.fi
+;
+;procedure saver_setup	 - initialises the screen saver
+;procedure saver_display - starts the screen saver, returns when key pressed
+
+proc saver_setup
+    {
+    savey=0	    ;next y for word
+    savei=1	    ;next word direction
+    save_quotes=0
+
+    randomize low timer
+    }
+
+proc saver_display(saver_mode)	    ;1=screen, 0=quotes
+    {
+    savec=0			;word counter - look for word 0-8
+    savew=0			;current word address
+    save_delay=40+rnd and 127	;delay before next 'sentence'
+
+    forever
+	{
+	if keyscan then return
+
+	if saver_mode then	;first scroll screen right
+	    {
+	    m=0
+	    repeat 25
+		{
+		move 79 from video|m+2 to video|m
+		video[m+158]=0720h
+		m+=160
+		}
+	    }
+
+	if savew=0 then
+	    {
+	    if save_delay then
+		{
+		save_delay--
+		goto scroll_again
+		}
+
+	    if savec=0 then
+		{
+		if saver_mode then
+		    {
+		    if mono
+		    then colour 7+(rnd and 8)
+		    else colour 10+(rnd mod 6)
+		    }
+		sentence=peek (sentences+2*(rnd mod 3))
+		}
+
+	    m=peek (sentence+savec*2)
+	    c=peekb m:occ=c
+	    c=rnd mod c:oc=c
+	    savew=m+1
+	    while c
+		{
+		savew=searchb 50 from savew for 0
+		savew++
+		c--
+		}
+	    savec++
+	    if savec>8 then
+		{
+		savec=0
+		if saver_mode then save_delay=30+(rnd and 63)
+		}
+
+	    saveend=savew
+
+	    if savec=1 then
+		{
+		pokeb saveend,peekb saveend and 11011111b
+		}
+	    else pokeb saveend,peekb saveend or 00100000b
+
+	    savey+=savei
+	    if (savey=0) or (savey=24) then savei=0-savei
+	    }
+
+	if saver_mode then
+	    {
+	    if peekb savew then
+		{
+		locate savey,79
+		print chr peekb savew;
+		savew++
+		}
+	    else savew=0
+	    }
+	else
+	    {
+	    while peekb saveend print bios chr peekb saveend;:saveend++
+	    if savec=0 then
+		{
+		print bios
+		save_quotes++
+		curtoloc:print save_quotes;
+		}
+	    else print bios " ";
+	    savew=0
+	    }
+
+	scroll_again:
+
+	if saver_mode then
+	    {
+	    x=peek 0040h|006ch
+	    while x=peek 0040h|006ch { }    ;see on int 1
+	    x=peek 0040h|006ch
+	    while x=peek 0040h|006ch { }    ;see on int 1
+	    }
+	}
+
+    sentences: data sentence1,sentence2,sentence3
+
+    sentence1: data word1,word2,word3,word4,word5,word6,word7,word2,word3
+    sentence2: data word2,word2,word3,word8,word6,word1,word2,word3,word9
+    sentence3: data word1,word3,word4,word2,word10,word1,word3,word4,word2
+
+    word1:
+    datab 8
+    fname 'a'
+    fname 'the'
+    fname 'your'
+    fname 'my'
+    fname 'his'
+    fname 'her'
+    fname 'our'
+    fname 'some'
+
+    word2:
+    datab 37
+    fname 'flat'
+    fname 'fat'
+    fname 'smelly'
+    fname 'rotten'
+    fname 'green'
+    fname 'yellow'
+    fname 'blue'
+    fname 'red'
+    fname 'black'
+    fname 'white'
+    fname 'small'
+    fname 'large'
+    fname 'hairy'
+    fname 'wet'
+    fname 'hard'
+    fname 'soft'
+    fname 'tiny'
+    fname 'pink'
+    fname 'sore'
+    fname 'loud'
+    fname 'wicked'
+    fname 'naughty'
+    fname 'clean'
+    fname 'dirty'
+    fname 'amazing'
+    fname 'interesting'
+    fname 'clever'
+    fname 'dumb'
+    fname 'cold'
+    fname 'warm'
+    fname 'hot'
+    fname 'tall'
+    fname 'short'
+    fname 'lying'
+    fname 'happy'
+    fname 'sad'
+    fname 'degenerate'
+
+    word3:
+    datab 38
+    fname 'frog'
+    fname 'phone'
+    fname 'tv'
+    fname 'fish'
+    fname 'slime'
+    fname 'man'
+    fname 'boy'
+    fname 'girl'
+    fname 'tyre'
+    fname 'cow'
+    fname 'vegetable'
+    fname 'cat'
+    fname 'knife'
+    fname 'heater'
+    fname 'table'
+    fname 'cup'
+    fname 'mug'
+    fname 'pencil'
+    fname 'women'
+    fname 'lady'
+    fname 'mouse'
+    fname 'puddle'
+    fname 'plant'
+    fname 'bottle'
+    fname 'drink'
+    fname 'beer'
+    fname 'whiskey'
+    fname 'tree'
+    fname 'car'
+    fname 'bike'
+    fname 'engine'
+    fname 'eye'
+    fname 'fridge'
+    fname 'baby'
+    fname 'apple'
+    fname 'banana'
+    fname 'bed'
+    fname 'blanket'
+
+    word4:
+    datab 4
+    fname 'was'
+    fname 'is'
+    fname 'has been'
+    fname 'will be'
+
+    word5:
+    datab 29
+    fname 'looking'
+    fname 'reading'
+    fname 'screaming'
+    fname 'waking'
+    fname 'slurping'
+    fname 'sleeping'
+    fname 'smoking'
+    fname 'running'
+    fname 'cleaning'
+    fname 'swimming'
+    fname 'fishing'
+    fname 'hurling'
+    fname 'talking'
+    fname 'walking'
+    fname 'climbing'
+    fname 'helping'
+    fname 'drinking'
+    fname 'eating'
+    fname 'kissing'
+    fname 'cooking'
+    fname 'making'
+    fname 'kissed'
+    fname 'cooked'
+    fname 'fished'
+    fname 'drunk'
+    fname 'smashed'
+    fname 'thrown'
+    fname 'tossed'
+    fname 'smiling'
+
+    word6:
+    datab 13
+    fname 'up'
+    fname 'on'
+    fname 'down'
+    fname 'across'
+    fname 'through'
+    fname 'over'
+    fname 'under'
+    fname 'above'
+    fname 'below'
+    fname 'in'
+    fname 'within'
+    fname 'into'
+    fname 'out of'
+
+    word7:
+    datab 6
+    fname 'the'
+    fname 'his'
+    fname 'her'
+    fname 'your'
+    fname 'my'
+    fname 'its'
+
+    word8:
+    datab 23
+    fname 'ran'
+    fname 'runs'
+    fname 'swims'
+    fname 'smashes'
+    fname 'kills'
+    fname 'drinks'
+    fname 'walks'
+    fname 'climbs'
+    fname 'helped'
+    fname 'ate'
+    fname 'kissed'
+    fname 'cooks'
+    fname 'looked'
+    fname 'screamed'
+    fname 'shoved'
+    fname 'smoked'
+    fname 'slurped'
+    fname 'slid'
+    fname 'sleeped'
+    fname 'made'
+    fname 'makes'
+    fname 'smiled'
+    fname 'drowns'
+
+    word9:
+    datab 1
+    fname ' '
+
+    word10:
+    datab 1
+    fname ','
+    }
+

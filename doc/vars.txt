@@ -1,0 +1,15 @@
+VARIABLE ASSIGNMENTS
+====================
+~var *= n    Multiplies var by n, storing result in var.
+~var ++      Increments var (by 1), storing result in var.
+~var += n    Adds n to var, storing result in var.
+~var --      Decrements var (by 1), storing result in var.
+~var -= n    Subtracts n from var, storing result in var.
+~var /= n    Divides var by n, storing result in var.
+~var = n     Gives var the value of n.
+~var @ n     Gives the variable a new address in memory (the default address
+            is somewhere after the FAST code).
+
+Note ! A variables address must be set before the variable is used anywhere.
+     ! n must be a constant.
+~

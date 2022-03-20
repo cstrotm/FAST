@@ -1,0 +1,72 @@
+
+;==============================================================================
+; screen saver - displays twirly blobs
+;==============================================================================
+
+;this file can be included in any program: #include saver.fi
+;
+;procedure saver_setup	 - initialises the screen saver
+;procedure saver_display - starts the screen saver, returns when key pressed
+
+const ss_boxes=8
+ss_mem ? ss_boxes*4	    ;x,y,circle
+
+proc saver_setup
+    {
+    fill ss_boxes*2 from ss_mem with 0
+    }
+
+proc saver_display(saver_mode)
+    {
+    colour 7:cls:cursor 0,0
+    counter=0
+
+    while not keyscan
+	{
+	m=ss_mem
+	for box=1 to ss_boxes
+	    x=peekb m
+	    y=peekb (m+1)
+	    c=peekb (m+2)
+	    i=peekb (m+3)
+
+	    if x=0 then
+		{
+		if (rnd and 63)=10 then
+		    {
+		    x=1+rnd mod 79
+		    y=rnd mod 25
+		    i=1+rnd and 7
+		    }
+		}
+
+	    if x then
+		{
+		locate y,x
+		if box and 1 then colour 7 else colour 15
+		if (rnd and 63)=20 then x=0:s=' '
+		else
+		    {
+		    c+=i
+		    s=peekb (circle+((c/8) and 3))
+		    }
+		print chr s;
+		}
+
+	    pokeb m,x:pokeb m+1,y:pokeb m+2,c:pokeb m+3,i
+	    m+=4
+	next box
+
+	repeat 200 repeat 200 { }
+	counter++
+
+	locate 0,0
+	if counter and 256
+	then print "(screen saver)";
+	else print "              ";
+	}
+    return
+
+    circle: datab '|/-\'
+    }
+

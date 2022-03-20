@@ -1,0 +1,79 @@
+
+;==============================================================================
+; sprite image include file - use with sprite library "sprite.lib"
+; see "sprite.f" for full details
+;==============================================================================
+
+#errors off
+#short
+
+const max_size=20,max_sprites=800
+const sprite_library=max_size*max_sprites
+
+var32 sprite_addr
+
+;==============================================================================
+
+;open library, load base segment into memory
+;returns 0 if ok, else error number
+
+function open_sprite_library
+    {
+    sprite_seg=allocate sprite_library/16+1	;16K
+
+    open #1,"sprite.lib"
+    if error then e=error:return e
+
+    r=read #1,sprite_library to sprite_seg|0
+    if error then e=error:return e
+    if r<>sprite_library then return 13     ;bad data
+
+    return 0	    ;Ok
+    }
+
+;==============================================================================
+
+;load sprite into specified memory area
+;return 0 if ok, else error number - see return codes for details
+
+function load_sprite(sprite_n,sprite_mem)
+    {
+    m=sprite_name:l=16
+    while l
+	{
+	c=peekb sprite_n
+	if c then sprite_n++ else c=' '
+	pokeb m,c:m++
+	l--
+	}
+
+    spritem=0
+    sprite_no=0
+
+    while sprite_seg[spritem]b<>255
+	{
+	#long
+	if not compare 8 at sprite_name with sprite_seg|spritem then
+	    {
+	    #short
+	    sprite_addr=peek sprite_seg|(spritem+16)
+	    seek #1,sprite_addr
+
+	    r=read #1,2 to sprite_mem
+	    sprite_width=peekb sprite_mem
+	    sprite_depth=peekb (sprite_mem+1)
+
+	    if sprite_width>64 then return 13	;bad data
+	    if sprite_depth>40 then return 13	;bad data
+
+	    r=read #1,sprite_width*sprite_depth to sprite_mem+2
+	    return 0	    ;Ok
+	    }
+	spritem+=max_size
+	}
+
+    return 12	;invalid access code (not found)
+
+    sprite_name: space 16
+    }
+

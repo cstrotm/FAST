@@ -1,0 +1,99 @@
+
+;===========================================================================
+; FAST mouse functions
+;===========================================================================
+
+;see mouse.f and sprite.f for example usage of the mouse
+;comments included - see below
+
+const mouse_left_button=1
+const mouse_right_button=2
+const mouse_centre_button=4
+
+function mouse_int(ax)
+    {
+    reg ax=ax
+    int 33h
+    return	;register AX
+    }
+
+;==============================================================================
+
+function mouse_init mouse_int(0000h)	    ;returns reg ax (0=not installed)
+
+;==============================================================================
+
+function mouse_show mouse_int(0001h)
+function mouse_hide mouse_int(0002h)
+
+;==============================================================================
+
+function mouse_position
+    {
+    mouse_int(0003h)
+
+    mouse_button=reg bx
+    mouse_x=reg cx
+    mouse_y=reg dx
+    }
+
+;mouse_button and 1 = left
+;mouse_button and 2 = right
+;mouse_button and 4 = middle
+
+;mouse_x = pixels (0,0 = top left)
+;mouse_y = pixels, when in text modes these are in multiples of 8.
+
+;==============================================================================
+
+function mouse_shape(mouse_m)
+    {
+    reg bx=1,cx=1,es=reg ds,dx=mouse_m
+    mouse_int(0009h)
+    }
+
+;==============================================================================
+
+;mouse_m     = event handler address (saves all registers, does a far ret)
+;mouse_flags = events to call handler on.
+;		bit 0 = mouse movement
+;		bit 1 = left mouse activated
+;		bit 2 = left mouse released
+;		bit 3 = right mouse activated
+;		bit 4 = right mouse released
+;		bit 5 = centre mouse activated
+;		bit 6 = centre mouse released
+;		bit 7-15 unused
+
+function mouse_handler(mouse_m,mouse_flags)
+    {
+    reg cx=mouse_flags,es=reg ds,dx=mouse_m
+    mouse_int(000ch)
+    }
+
+;registers are parsed to the event handler:
+; AX = event mask (as above)
+; BX = mouse button status (0=left,1=right, 2=centre)
+; CX = x coordinate
+; DX = y
+; SI = length of last horizontal movement (mickeys - 1/200th inch)
+; DI = length of last vertical movement
+; DS = mouse driver data segment
+
+;mouse_event should be set to flags of 0 afterwards so no interupts are
+;triggered.
+
+;==============================================================================
+
+;1=no interupts
+;2=30 per second
+;4=50
+;8=100
+;16=200
+
+function mouse_speed(mouse_s)
+    {
+    reg bx=mouse_s
+    mouse_int(001ch)
+    }
+

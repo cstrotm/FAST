@@ -1,0 +1,173 @@
+#DEBUG      #DEBUG ON/OFF
+
+All commands compiled while DEBUG is on will call the current
+ON DEBUG statment (by default the ON DEBUG statement tests the break key).
+
+Note ! Each line compiled while debug is on will use an extra 5 bytes.
+~#ENDCODE    #ENDCODE
+
+Artificial end of file marker.
+
+Note ! ENDCODE stops compiling everything, simulates end of file.
+~#ENDIF      #ENDIF
+
+Tells FAST that the previous #IF has ended.
+~#ENTRY      #ENTRY
+
+Sets the entry point of the program, instead of the very first line of code.
+~#ERRORS     #ERRORS ON/OFF
+
+Any FAST commands that include ERROR checking set the ERROR variable (0 for no
+error). While #ERRORS ON, these commands will also call the current ON ERROR
+routine (if ERROR<>0).
+
+Example.
+
+    a) #ERRORS OFF
+       OPEN #1,"pu.cfg"
+       IF ERROR THEN ERROR ;If there was an error call ERROR.
+
+ or b) #ERRORS ON
+       OPEN #1,"pu.cfg"    ;If error then automatically ERROR.
+~#IF         #IF n
+
+If expression n (constants only) is true (not 0) then the commands until the
+next #ENDIF are compiled, when n=0 all the statements are ignored until the
+#ENDIF.
+#IF can be nested to a maximum of 20 levels.
+
+Example.
+
+#IF ledger
+    #INCLUDE gledger.f
+    #IF charts
+        #INCLUDE charts.f
+    #ENDIF
+#ENDIF
+~#INCLUDE    #INCLUDE filename.f
+
+Tells FAST to compile another source file within the current file.
+The full filename and extension must be specified, drive and path are optional.
+
+Note ! Every file included uses 10k (default buffer size) while being compiled,
+       this memory is freed when each file finishes being compiled.
+~#INPEND     #INPEND=b
+
+Changes the default end character for the INPUT command.
+If INPUTS is used only to enter filenames then #INPEND=0 would automatically
+make all strings entered ASCIIZ strings.
+
+Notes ! b must be a constant.
+      ! The default end character is 13 (CR).
+      ! Only the last #INPEND setting is used.
+~#LONG     + #LONG
+
+Sets compiling of IF THEN ELSE statements to long mode.
+Every IF THEN ELSE will use NEAR jumps rather than SHORT jumps.
+
+The opposite to #LONG is #SHORT.
+~#PARA     + #PARA
+
+Aligns the code address to the next paragraph (multiple of 16 bytes).
+
+Should only be used when data must be stored on a paragraph boundary.
+~#PROTECT    #PROTECT
+
+Include the command #PROECT in any source file and it will be protected to
+the extent where it will check if it (the .COM file) has been corrupted or
+tampered with by a virus. If it has then a warning will appear on the
+screen when the program is run.
+
+To eradicate your computer from the virus you will need to find the correct
+vaccination program for your virus(es) then once all backups are restored,
+recompile every FAST program. You should check all .COM and .EXE files for
+viruses at the same time.
+~#SETDOS     #SETDOS v.xx
+
+Sets the required DOS version needed to run the compiled program to any
+specified version. Any version set below the current version will be ignored.
+
+The current minimum is 2.00
+~#SHORT    + #SHORT
+
+Sets compiling of IF THEN ELSE statements to short mode.
+Every IF THEN ELSE will use SHORT jumps rather than NEAR jumps.
+
+#SHORT should be used wherever size is restricted and speed is needed.
+#LONG is still fast but #SHORT will remove another 2 instructions of more from
+IF THEN ELSE commands.
+
+The opposite to #SHORT is #LONG.
+~#STACK    + #STACK MEMORY n
+
+Sets the stack memory (in bytes) available for the compiled program.
+
+Notes ! n must be a constant.
+      ! The default stack memory is 1024 bytes.
+      ! Only the last #STACK setting is used.
+~#TRACE      #TRACE ON/OFF
+
+Sets the trace mode.
+
+If trace is turned on then all lines compiled after the #TRACE ON until when
+trace is turned off are made traceable.
+
+To trace a program:
+
+    1) Insert #TRACE directives into the source code where you want to see the
+       code running then compile it.
+
+    2) Type "FASTT program" at the DOS prompt to start.
+
+
+Note ! The file called source.FT is the FAST TRACE file.
+       A program can only be traced if an FT file exists.
+
+     ! Each line compiled while trace is on will use an extra 1 byte.
+~#WINDOW     #WINDOW MEMORY n
+
+Sets the amount of memory (in bytes) available for windows.
+If no windows are used, FAST automatically sets window memory to 0.
+
+Notes ! n must be a constant.
+      ! The default window memory is 1500 bytes.
+      ! Only the last #WINDOW setting is used.
+~COMPILER DIRECTIVES
+===================
+A compiler directive can tell the compiler to set options and compile bits of
+program optionally or include other files.
+
+Compiler directives are treated the same as commands by the compiler, read the
+following examples to see how they are treated...
+
+Examples.
+
+IF key='t' THEN #TRACE ON       ;This would tell the compiler to set the trace
+                                 option on regardless of whether key='t'.
+                                 The same as "IF key='t' THEN NULL"
+                                             "#TRACE ON           ".
+
+#SHORT      ;This option would stay on until turned off (in the case of #SHORT
+            it is turned off at the start of each #INCLUDE file and restored to
+            its orignal state when compiling of an include file finishes).
+
+Notes:      +   represents a directive which is considered ADVANCED.
+            $$$ represents a directive which is not working yet - work needed.
+~Compiler Directive Defaults
+---------------------------
+The following is a list of how FAST is setup before compiling starts:
+
+    #DEBUG OFF
+    #ENTRY
+    #ERRORS ON
+    #INPEND
+    #SETDOS 2.00
+    #STACK MEMORY 1024  ;Set by FAST /M
+    #TRACE OFF
+    #WINDOW MEMORY 1500 ;Set by FAST /M (if windows not used: #WINDOW MEMORY 0)
+
+The following is a list of how FAST is setup before compiling each file:
+(note options are restored to their original setting after including a file)
+
+    #LONG
+~

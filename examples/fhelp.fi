@@ -1,0 +1,100 @@
+#short
+;== Help procedure =========================================================
+;
+; start_address = fhelp ( filename , segment , start_address , segment_size)
+;
+; note: print and find option still to be done...
+; note: #ERRORS ON is set after FAST compiles FHELP.FI
+; note: If filename = 0 then FHELP doesn't load the file.
+;
+; if start_address = 65535 (-1) then the last page will be shown.
+
+
+unsigned fh_seg,fh_uo,fh_do,fh_end
+
+function fh_up(fh_uo,fh_c)
+    {
+    repeat fh_c
+	{
+	if fh_uo=0 then return fh_uo
+	fh_uo-=2
+	if fh_seg[fh_uo]b=13 then fh_uo--
+	if fh_uo>65520 then fh_uo=0:return fh_uo
+
+	fh_back_loop:
+	if fh_uo=0 then return fh_uo
+	fh_b=fh_seg[fh_uo]b
+	if fh_b<>13 then fh_uo--:goto fh_back_loop
+
+	fh_uo+=1+(fh_seg[fh_uo+1]b=10)
+	}
+    return fh_uo
+    }
+
+function fh_dn(fh_do,fh_c)
+    {
+    repeat fh_c
+	{
+	fh_do=searchb 256 from fh_seg|fh_do for 13
+	if not fh_do then
+	    {
+	    if fh_seg[fh_do]b=13 then goto fh_dn_ok
+	    fh_goend:
+	    fh_do=fh_end
+	    return fh_do
+	    }
+	fh_dn_ok:
+	fh_do++
+	if fh_seg[fh_do]b=10 then fh_do++
+	if fh_do>fh_end then goto fh_goend
+	}
+    return fh_do
+    }
+
+function fhelp(fh_n,fh_seg,fh_o,fh_max)
+    {
+    colour 120:locate 0,0
+    if fh_n then print "  FILE: ";:fh_null=printm fh_n,20
+	else print "  VIEW			";
+    locate 0,28
+    print "  PgUp  PgDn  Home	End  Escape		       ";
+    colour 7					      ;"Print  Find"
+
+    #errors off
+    if fh_n then
+	{
+	load fh_n,fh_seg|0,fh_max
+	if error then beep:return
+	}
+    #errors on
+
+    fh_seg[fh_max-1]b=26    ;eof
+    fh_end=fh_up(searchb fh_max from fh_seg|0 for 26,23)
+    if fh_o>=fh_end then fh_o=fh_end
+
+    forever
+	{
+	m=fh_o
+	for y=1 to 25
+	locate y,0
+	m=printm fh_seg|m,80   ;print page
+	next y
+
+	wait for keypressed
+	fh_s=scan
+	if fh_s=1 then return fh_o
+	if fh_s=71 then fh_o=0
+	if fh_s=72 then fh_o=fh_up(fh_o,1)
+	if fh_s=73 then fh_o=fh_up(fh_o,24)
+	if fh_s=79 then fh_o=fh_end
+	if fh_s=80 then fh_o=fh_dn(fh_o,1)
+	if fh_s=81 then fh_o=fh_dn(fh_o,24)
+	}
+    }
+
+;seg=allocate 50000/16
+;fhelp(file,seg,0,50000)
+;stop
+
+;file: fname 'wt.f'
+

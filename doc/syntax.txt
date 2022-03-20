@@ -1,0 +1,102 @@
+#n          A File number, n is between 1 and 12.
+
+These file numbers are independent of DOS handles. #1 through 12 contain the
+number of a file handle. Eg #1=any number which represents a DOS file handle.
+OPEN #1,"file.ext" will set #1=5 (or whatever the next available handle happens
+to be).
+
+See the HANDLE command for a more exclusive description of file handles.
+~All capitals relate to FAST words for readibility (case is ignored by the
+compiler, ie FAST is not case sensitive).
+
+All SYNTAX entries are descriptions of syntax used in the help for FAST
+commands and functions.
+~[ ]         Anything in square brackets is optional.
+~[?...]      The last parameter can be repeated.
+
+The following optional parameters are seperated by the character in place of the
+
+question mark (?).
+
+Example.
+
+DATA n [,...]
+
+can be used as DATA 10,20,30,40,50
+~[B]         Optional B: means the command/function can be Byte or word(default).
+
+
+Example.
+
+MOVE[B]
+
+Can be used as MOVE (moves words)
+            or MOVEB (bytes).
+~address     Either 'n' or 'n|n' (pipe symbol means SEGMENT:OFFSET).
+
+Just 'n' defaults to the current data segment (same as code segment).
+
+See the SEGMENTS entry for a description of segments and memory.
+
+Note: FAST /m can be used to change the pipe symbol to the exclamation mark (!)
+      if needed. The pipe symbol was not compatible with certain printers.
+~b           Same as n but only a byte value. Values range from 0 to 255.
+~duration    Same as n.
+~filename    An address or string which points to a file name.
+
+Either n      - is the address of an ASCIIZ filename
+    or "name" - for the actual DOS filename to be used.
+~increment   Same as n.
+~label       A reference to code or data, all labels must be unique.
+
+A label is defined using either a) CONST label=n    ;label=n.
+                             or b) label:           ;label=code address.
+                             or c) label ? n        ;label=address of space for
+                                                    ;      n bytes in the
+                                                    ;      variable table.
+~last        Same as n.
+~length      Same as n.
+~m           Same as n.
+~n           Numeric expression.
+
+Any of constant, variable & function combined with operators and brackets.
+
+Note ! FAST 'at this point in time' does not have proper prioritising of
+       operators.
+
+       Known problem: n - n*10  ;Where - is used any expression after it is
+                                 calculated on bit at a time.
+                                 n-n*10 would = (n-n)*10.
+
+Use brackets () whenever AND, OR, XOR, - and most functions are used.
+~pathname    An address or string which points to a path name.
+
+Either n      - is the address of an ASCIIZ pathname
+    or "name" - for the actual DOS pathname to be used.
+~reclen      Same as n, except it is optional, default=1.
+~segment     Same as n.
+~statement   One or many commands grouped together.
+
+Either a) one command seperated by colons (:) until the end of the line or
+            Example.
+            IF x>20 THEN PRINT "HIGH SCORE":GOTO START
+
+       b) many commands enclosed within squiggly brackets {}.
+            Example.
+            IF x>20 THEN
+                {
+                PRINT "HIGH SCORE"
+                GOTO START
+                }
+~step        Same as n, except it is optional, default=1.
+~string      Any text or message enclosed in single quotes ('example').
+~var         Any variable name.
+
+Variables are 16 bits and they are signed by default, therefore ranging from
+-32768 to +32767. Unsigned variables range from 0 to 65535.
+
+To define a variable expilicitly before it is used as either signed or unsigned
+then use the VAR (signed) or UNSIGNED command.
+~x           Same as n.
+~y           Same as n.
+~

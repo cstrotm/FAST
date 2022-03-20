@@ -1,0 +1,73 @@
+;'
+;'== Find string using binary sorting =======================================
+;'
+;' FIND_BIN (string,segment,address,records,length,compare_length,Char,extras)
+;' 0 = not found, else element (1-records).
+;'
+;' string length is no longer needed, automatically scaned for.
+;' BIN_CHR = character to lookfor at end of string
+;' BIN_EXT = any extra characters after BIN_CHR.  ie; like whitecat Tag area
+;'
+
+#short
+var find_bin_put
+
+function find_bin(bin_str,bin_seg,bin_adr,bin_rec,bin_cmp,bin_chr,bin_ext,BIN_LEN)
+    {
+    find_bin_put=1
+    bin_low=0:bin_high=bin_rec
+    if bin_rec=0 then return 0
+    while bin_low<=bin_high
+	{
+	bin_mid=(bin_high-bin_low)/2+bin_low
+	if bin_mid>=bin_rec then find_bin_put=bin_rec+1:return 0
+	;Compare string at BIN_STR and BIN_SEG|BIN_ADR+BIN_MID*BIN_LEN.
+
+
+
+  IF BIN_LEN >0 then
+        {
+        bin_m=bin_adr+bin_mid*bin_len:goto avoid:
+        }
+
+;print bin_m
+
+;'print"bin_mid = ";bin_mid;"   ";
+
+;'
+;'  FIND Position and LENGTH OF STRING IN SORT_SEG BUFFER
+;'
+        klen=0
+        for sfly=0 to bin_mid
+        tlen=0
+        while peekb bin_seg|(klen+tlen)<>bin_chr tlen++
+        bin_m=(klen+bin_adr)
+        klen+=(tlen+bin_ext+1)
+        next sfly
+avoid:
+;'print bin_m;"  i = ";i-1;"   bin_len= ";bin_len;"   klen= ";klen
+
+
+;' remember to rem out 4 lines below
+
+;'       m=bin_str:repeat bin_cmp print chr peek m;:m++
+;'       print "<...>";
+;'       m=bin_m:repeat bin_cmp print chr bin_seg[m];:m++
+;'       print
+
+        bin_q=compareb bin_cmp at bin_str with bin_seg|bin_m
+        if bin_q then
+	    {
+	    bin_c=bin_seg[bin_m+bin_q-bin_str]b
+            if peekb bin_q>bin_c
+                then bin_low=bin_mid+1
+		else bin_high=bin_mid-1
+	    }
+        else
+
+        return bin_mid+1
+	}
+    if bin_low>bin_rec then find_bin_put=bin_low-1
+        else find_bin_put=bin_low+1
+    return 0
+    }

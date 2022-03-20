@@ -1,0 +1,467 @@
+AN_INTRO
+INTRODUCTION
+============
+
+   FAST is a completely new language for the IBM PC/compatible, running
+with MS/PC DOS (version 2 or higher).
+
+What does FAST offer that other languages don't?
+
+   a) Programs written using FAST will almost always run faster than the
+      comparable program written in say C or TURBO PASCAL. Including ALL
+      Pascal, C & BASIC language compilers.
+   b) Compiling speed is at least 1.5 times faster than the comparable
+      languages (500 - 900 lines per second on 8MHZ AT).
+   c) Special commands for things like sprites, windows, error handling,
+      screen displaying and memory allocation. Also automatic fast screen
+      printing, sorting and searching.
+   d) Use of dos functions and interupts. Setup your own interupts and
+      frequencies to a certain extent.
+   e) Source debugging - full control of which segments of code to debug.
+   f) Real sound and keyboard control.
+   g) Code written in machine language can easily be converted to FAST
+      because FAST supports many machine language only commands such as
+      block move, fill, search & compare instructions.
+   h) FAST has the fastest screen printing commands available, without having
+      to manipulate the screen memory yourself.
+   i) FAST is very econimcal on memory. FAST uses .COM files which are limited
+      to 64k (this would be 5000+ lines of source code).
+      A typical small file eg SIEVE.F compiles to about 600 bytes.
+   j) FAST has built in all the Terminate and Stay Resident commands and
+      functions. A TSR can be as small as about 700 bytes.
+   k) FAST is very versatile, most applications can be written in FAST using
+      all the high level commands of FAST, but with more experience a program
+      can be speeded up with use of more advanced commands also available.
+   l) Programs can be written and running in a very short time, making it
+      handy for small one-off jobs which must be completed very quickly.
+   m) If you want to write a game using sprites or design a graphic interface
+      for some purpose then FAST has all the necessary features (WIMP is very
+      trendy these days).
+   n) I've written a Free Flow Database in FAST using 3000 lines of source code
+      and a full text editor (2000 lines).
+      Also many other utilities.
+      Now I'm writing a very FAST 4GL (come 5GL) database language, compiler
+      and runtime for a multi-user network.
+~BUG
+Known BUGS...
+
+1) FAST does not produce the correct code when an expression subtracts a label
+   which is not defined until later in the program. To overcome this temporary
+   problem declare a variable at the start equal to the label then substitute
+   the variable name for the label.
+
+2) The RESET INTERUPTS command won't reset interupts if it's used before
+   interupts are used anywhere (eg ON INT 1) becuase it doesn't think the
+   interupt library is being used. To be fixed soon.
+
+
+Known strangeness...
+
+1) Some (maybe all) 286 (386?) (486?) machines cannot read a word of memory
+   when the offset is 0ffffh. I do not know whether this is a bug or not but
+   beware of this problem. It literally hangs the CPU halfway through an
+   instruction.
+~COMPILE
+Compiling a Program
+-------------------
+Firstly - The file must be in ASCII format (created using a standard text
+          editor, WT for example).
+        - The file should have the .F extension.
+
+To compile the source file type:
+
+        'FAST source'  or  'FAST'  (you will then be prompted for details).
+     or 'FAST source;' to skip any prompts.
+
+Type 'FAST /h' for help on your version of FAST.
+Type 'FAST /m' for altering some of FAST's default options.
+
+Notes ! If there is not enough memory to compile then FAST will abort with a
+        message saying it needs 200k of memory (approximately).
+      ! Only if compiling is sucessful will FAST write a new .COM file, this
+        is always called source.COM (source being the main file just compiled).
+      ! If a listing of either the source or symbol table is output to disk
+        then the file used will be called source.LST
+~DEF_VARS
+FAST Default Variables
+======================
+
+FAST has several built in variables which can be used just as your own
+variables. These can be utilised by you for increased versatility.
+
+Variable name    Default     Description
+------------------------------------------------
+COLOR / COLOUR       7       Colour value used by FASTs screen printing.
+DURATION             0       Time in 1/18.2 second units left for sound.
+ERROR                0       Current error value.
+ERRORV         error handler Current error handler address.
+IHERE                0       Whether program is in middle of an interupt?
+LOCPOS               0       Current screen position of FAST screen printing.
+MONO           set by system Type of display, hercules = 1, CGA = 0.
+VIDEO          0b000h/0b800h Segment of screen display.
+SERIAL_SEG           ?       See ENABLE SERIAL.
+SERIAL_SIZE          ?       See ENABLE SERIAL.
+SERIAL_HEAD          ?       See ENABLE SERIAL.
+~FAST_DIC
+SYSTEM VARIABLES
+
+This is a list of FAST's words. It is not guaranteed to be 100% accurate.
+
+color
+colour
+duration
+error
+errorv
+find_bin_put
+ihere
+locpos
+mono
+serial_head
+serial_seg
+serial_size
+video
+
+COMPILER DIRECTIVES
+
+debug
+endif
+entry
+errors
+if
+include
+inpend
+long
+para
+setdos
+short
+stack
+trace
+window
+
+FAST COMMANDS
+
+asciiz
+beep
+break
+bright
+call
+change
+clocks
+close
+cls
+color
+colour
+const
+const32
+create
+curpos
+cursor
+curtoloc
+data
+datab
+deallocate
+delete
+dim
+dimb
+dir
+disable break
+disable interupts
+disable serial
+dos
+enable break
+enable interupts
+enable serial
+endcode
+endfor
+error
+execute
+fill
+fillb
+find
+flash
+fname
+for
+forever
+free
+function
+gosub
+goto
+halt
+handle
+hgraphics
+htext
+if
+ink
+inline
+inputs
+int
+iret
+jump
+let
+line
+load
+locate
+loctocur
+lprint
+lprintb
+lprinth
+lprinthb
+make
+mode
+modify
+move
+moveb
+next
+noise
+null
+on break
+on critical
+on debug
+on error
+on idle
+on int
+on key
+on scan
+on trace
+open
+out
+page
+palette
+paper
+plot
+poke
+pokeb
+pop
+popall
+print
+printb
+printh
+printhb
+prints
+proc
+procedure
+psp
+push
+pushall
+randomize
+read
+readb
+reclen
+reg
+remove
+rename
+repeat
+reset
+restore
+retf
+return
+save
+screen
+scroll
+seek
+setint
+shape
+shell
+sound
+space
+sppos
+sprint
+sprintb
+sprinth
+sprinthb
+sprite
+stack
+stop critical
+stop debug
+stop error
+stop idle
+stop int
+stop key
+stop resident
+stop scan
+stop trace
+string
+swap
+terminate
+test
+timer
+unsigned
+var
+var32
+wait
+while
+write
+
+FAST OPERATORS
+
+-
+=
++
+*
+/
+<>
+>=
+<=
+>
+<
+above
+below
+and
+or
+xor
+mod
+
+FAST FUNCTIONS
+
+abs
+allocate
+carry
+cdisk
+compare
+compareb
+curpos
+digits
+dta offset
+dta segment
+eof
+findbin
+handle
+high
+hit
+in
+indoso
+indoss
+input
+inputb
+inputh
+inputhb
+key
+keypressed
+keyscan
+lcase
+low
+menu
+not
+page
+peek
+peekb
+point
+printm
+psp
+read
+reg
+rleft
+rleftz
+rnd
+rright
+rrightz
+scan
+scrchr
+screen
+search
+searchb
+select
+serial_send
+stack
+timer
+ucase
+usr
+
+FAST VARIABLE ASSIGNMENTS
+
+=
++=
+-=
+*=
+/=
+++
+--
+@
+[
+
+SEPERATORS
+
+at
+else
+for
+from
+step
+then
+to
+with
+
+PRINT CONTROL OPTIONS
+
+cr
+ff
+lf
+tab
+~INCLUDE
+EXTINPUT, FAST32, FSORT, FHELP & KEYS are all #INCLUDE files.
+
+These files can be used by any program for special functions.
+View the files individual with WT to find out how to use them and look at the
+example programs which use them.
+
+In brief:
+
+EXTINPUT provides extended input facilities, such as editing and re-inputting
+         over an existing string to make modifications.
+
+FAST32   provides a procedure for printing 32 bit numbers in various forms.
+
+FSORT    sorts any records within a 64k segment, each record must be a fixed
+         length. Automatically includes FINDBIN.
+
+FHELP    displays a file on screen with the basic cursor movements and a print
+         option. FHELP should be used as a standard way to display on-line help,
+
+         it is quick and easy to use. FHELP also has a find option.
+
+KEYS     allows testing for when keys are currently pushed or not, also
+         provides an optional repeat rate, used by games programs.
+~MAINT
+FAST Maintenance
+----------------
+To set the FAST options type:
+
+        'FAST /M'
+
+Several questions will appear:
+
+        Text buffer size  [10240] = Size of source file loaded in at once.
+        Maximum labels     [1000] = Maximum number of symbols allowed.
+        Label space       [14000] = Maximum space symbols can use.
+        Scroll step rate      [3] = When listing to the screen scrolls 3 lines.
+        Undef table space  [8000] = Amount of memory for undefined data table.
+        Window space       [1500] = Default WINDOW MEMORY size.
+        Stack size         [1024] = Default STACK MEMORY size.
+
+      * Segment:Offset |/!          You can use either the Pipe or Exclamation.
+        Print symbol table? [N]     Produce a symbol table?
+        Print memory usage? [N]     Produce output of memory used by FAST and
+                                    also by the .COM program when running.
+
+        Save changes? [N]           If yes then saves the new options.
+
+
+* Segment:Offset represents an address, due to incompatibility problems with
+  Gestetner laser printer control codes this option is provided.
+
+If FAST doesn't find a FAST.CFG file in the current directory then the default
+values are used.
+
+The amount of memory used by FAST when loaded up will equal
+
+        === FAST.COM size         34k
+            Text buffer size      10k
+            Max labels*2           2k
+            Label space           14k
+            Undef table space      8k
+            Compiled code size    64k
+            Trace segment data    64k
+                                 ----
+            Total memory needed  196k
+
+FAST now creates a FAST.CFG file in the directory which FAST /m was run from.
+~
