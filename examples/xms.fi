@@ -113,7 +113,7 @@ function xms_put(xms_size,xms_seg,xms_off,xms_point)
     xms(0b00h)
     }
 
-#if xms_move_function
+
 
 var32 xms_offset2,xms_size2
 
@@ -139,5 +139,5 @@ function xms_move(xms_size,xms_point,xms_point2)
     poke emms_bytes+2,0     ;reset length high
     }
 
-#endif
+
 
